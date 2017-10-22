@@ -1,10 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using System;
 
 namespace Samarium.PluginFramework {
+
+    using Samarium.PluginFramework.Command;
+    
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the basic structure of the main class of a Samarium plugin.
@@ -43,7 +47,10 @@ namespace Samarium.PluginFramework {
         /// <returns><code >true</code> if plugin termination was successful. <code >false</code> otherwise.</returns>
         bool OnStop();
         
-
+        /// <summary>
+        /// Gets the commands this plugin provides.
+        /// </summary>
+        List<ICommand> PluginCommands { get; }
 
     }
 }
