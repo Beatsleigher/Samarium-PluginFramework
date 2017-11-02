@@ -109,7 +109,7 @@ namespace Samarium.PluginFramework.Command {
         /// <summary>
         /// Gets or sets the handler method (Func), which is called on command execution.
         /// </summary>
-        Func<ICommandResult> Handler { get; set; }
+        CommandExecutedHandler Handler { get; set; }
         #endregion
 
     }

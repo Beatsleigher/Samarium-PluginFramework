@@ -24,6 +24,11 @@ namespace Samarium.PluginFramework {
         string PluginName { get; }
 
         /// <summary>
+        /// Gets the commands this plugin provides.
+        /// </summary>
+        List<ICommand> PluginCommands { get; }
+
+        /// <summary>
         /// Plugin initialisation.
         /// Handles all plugin init routines and returns either one of two states. (See returns section)
         /// </summary>
@@ -46,11 +51,21 @@ namespace Samarium.PluginFramework {
         /// </summary>
         /// <returns><code >true</code> if plugin termination was successful. <code >false</code> otherwise.</returns>
         bool OnStop();
-        
+
         /// <summary>
-        /// Gets the commands this plugin provides.
+        /// Gets a value indicating whether the inheriting plugin contains
+        /// a given command.
         /// </summary>
-        List<ICommand> PluginCommands { get; }
+        /// <param name="command">A command to check against.</param>
+        /// <returns><code >true</code> if the command was found in this plugin.</returns>
+        bool HasCommand(ICommand command);
+
+        /// <summary>
+        /// Gets a value indicating whether the inheriting plugin contains a given command.
+        /// </summary>
+        /// <param name="commandTag">A command to check against.</param>
+        /// <returns><code >true</code> if the command was found in this plugin.</returns>
+        bool HasCommand(string commandTag);
 
     }
 }

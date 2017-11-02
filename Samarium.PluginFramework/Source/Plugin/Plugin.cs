@@ -1,11 +1,11 @@
 ﻿using System;
 
 namespace Samarium.PluginFramework.Plugin {
-
-    using log4net;
-
+    
     using Samarium.PluginFramework.Command;
     using Samarium.PluginFramework.Config;
+    using Samarium.PluginFramework.Logger;
+
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
@@ -14,14 +14,22 @@ namespace Samarium.PluginFramework.Plugin {
 
     public abstract class Plugin : IPlugin {
 
-        private readonly ILog log;
+        internal static event CommandExecutionRequestedHandler CommandExecutionRequested;
+
+        private readonly Logger log;
 
         /// <summary>
         /// Constructor; instantiates an instance of this class. 
         /// </summary>
         protected Plugin() {
-            log = LogManager.GetLogger(PluginName);
-            log.Logger.IsEnabledFor(log4net.Core.Level.All);
+            log = Logger.CreateInstance(PluginName, null, PluginRegistry.Instance.SystemConfig.GetString("log_directory"));
+            CommandExecutionRequested += Plugin_CommandExecutionRequested;
+        }
+
+        private ICommandResult Plugin_CommandExecutionRequested(IPlugin sender, ICommand requestedCommand, params string[] execArgs) {
+            return PluginCommands?
+                .FirstOrDefault(x => x.CommandTag.ToLowerInvariant() == requestedCommand.CommandTag.ToLowerInvariant())?
+                .Execute(execArgs);
         }
 
         protected abstract IConfig PluginConfig { get; }
@@ -59,21 +67,21 @@ namespace Samarium.PluginFramework.Plugin {
         /// </summary>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        protected void Error(string format, params object[] args) => log.ErrorFormat(format, args);
+        protected void Error(string format, params object[] args) => log.Error(format, args);
 
         /// <summary>
         /// Log a debugging message. Should only be enabled if a debugger is connected!
         /// </summary>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        protected void Debug(string format, params object[] args) { if (Debugger.IsAttached) log.DebugFormat(format, args); }
+        protected void Debug(string format, params object[] args) { if (Debugger.IsAttached) log.Debug(format, args); }
 
         /// <summary>
         /// Log an informational message.
         /// </summary>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        protected void Info(string format, params object[] args) => log.InfoFormat(format, args);
+        protected void Info(string format, params object[] args) => log.Info(format, args);
 
         /// <summary>
         /// Log a potentially lethal (fatal) message.
@@ -81,14 +89,14 @@ namespace Samarium.PluginFramework.Plugin {
         /// </summary>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        protected void Fatal(string format, params object[] args) => log.FatalFormat(format, args);
+        protected void Fatal(string format, params object[] args) => log.Fatal(format, args);
 
         /// <summary>
         /// Log a warning message.
         /// </summary>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        protected void Warn(string format, params object[] args) => log.InfoFormat(format, args);
+        protected void Warn(string format, params object[] args) => log.Warn(format, args);
 
         /// <summary>
         /// Essentially a shortcut to <see cref="Console.WriteLine"/>
@@ -96,6 +104,22 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="format"></param>
         /// <param name="args"></param>
         protected void ToConsole(string format, params object[] args) => Console.WriteLine(format, args);
+
+        /// <summary>
+        /// Gets a value indicating whether the inheriting plugin contains
+        /// a given command.
+        /// </summary>
+        /// <param name="command">A command to check against.</param>
+        /// <returns><code >true</code> if the command was found in this plugin.</returns>
+        public bool HasCommand(ICommand command) => PluginCommands?.Count(x => x.CommandTag == command.CommandTag) > 0;
+
+        /// <summary>
+        /// Gets a value indicating whether the inheriting plugin contains
+        /// a given command.
+        /// </summary>
+        /// <param name="commandTag">A command to check against.</param>
+        /// <returns><code >true</code> if the command was found in this plugin.</returns>
+        public bool HasCommand(string commandTag) => HasCommand(new Command { CommandTag = commandTag });
         #endregion
 
     }

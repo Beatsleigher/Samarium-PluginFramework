@@ -13,6 +13,10 @@ namespace Samarium.PluginFramework.Config {
 
     public class DynamicConfig : IConfig {
 
+        public event ConfigSetEventHandler ConfigSet;
+
+        public event ConfigsLoadedEventHandler ConfigsLoaded;
+
         public static DirectoryInfo ConfigDirectory { get; }
 
         static DynamicConfig() {

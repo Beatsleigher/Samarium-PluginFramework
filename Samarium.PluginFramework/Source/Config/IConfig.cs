@@ -13,6 +13,16 @@ namespace Samarium.PluginFramework.Config {
     public interface IConfig {
 
         /// <summary>
+        /// Event called when a config is set to a new value.
+        /// </summary>
+        event ConfigSetEventHandler ConfigSet;
+
+        /// <summary>
+        /// Event called when the configs in an inherited object are loaded.
+        /// </summary>
+        event ConfigsLoadedEventHandler ConfigsLoaded;
+
+        /// <summary>
         /// Gets a value indicating whether this confiuration is dynamic
         /// in the sense that new configurations can be added file the file
         /// and still be recognized.

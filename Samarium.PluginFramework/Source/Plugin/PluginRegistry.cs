@@ -6,11 +6,13 @@ namespace Samarium.PluginFramework.Plugin {
 
     using Samarium.PluginFramework.Command;
     using Samarium.PluginFramework.Config;
+    using Samarium.PluginFramework.Exceptions;
 
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     /// <summary>Plugin registry.</summary>
     public class PluginRegistry {
@@ -25,9 +27,29 @@ namespace Samarium.PluginFramework.Plugin {
         public static PluginRegistry Instance { get; } = new PluginRegistry();
 
         internal PluginRegistry() {
-            this.listOfPlugins = new Dictionary<Assembly, Type>();
-            this.pluginInstances = new List<IPlugin>();
+            listOfPlugins = new Dictionary<Assembly, Type>();
+            pluginInstances = new List<IPlugin>();
+
         }
+
+        public async Task<ICommandResult> ExecuteCommandAsync(string commandTag, params string[] args) {
+            var command = MainSystemCommands.FirstOrDefault(x => x.CommandTag.ToLowerInvariant() == commandTag.ToLowerInvariant());
+
+            if (command is default) {
+                command = PluginInstances
+                    .FirstOrDefault(x => x.HasCommand(commandTag.ToLowerInvariant()))?
+                    .PluginCommands.FirstOrDefault(x => x.CommandTag.ToLowerInvariant() == commandTag.ToLowerInvariant());
+            }
+
+            if (command is default) {
+                throw new CommandNotFoundException(commandTag, "Could not find command!");
+            }
+
+            return await command.ExecuteAsync(args);
+
+        }
+
+        public ICommandResult ExecuteCommand(string commandTag, params string[] args) => ExecuteCommandAsync(commandTag, args).Result;
 
         /// <summary>Gets or sets the system config.</summary>
         /// <value>The system config.</value>
