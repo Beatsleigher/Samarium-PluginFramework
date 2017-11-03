@@ -45,6 +45,11 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Activation" />
+    <Reference Include="System.ServiceModel.Discovery" />
+    <Reference Include="System.ServiceModel.Routing" />
+    <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -68,6 +73,7 @@
     <Compile Include="Source\Plugin\IPlugin.cs" />
     <Compile Include="Source\Plugin\Plugin.cs" />
     <Compile Include="Source\Plugin\PluginRegistry.cs" />
+    <Compile Include="Source\Rest\RestService.cs" />
     <Compile Include="Source\UserInterface\BorderType.cs" />
     <Compile Include="Source\UserInterface\CharType.cs" />
     <Compile Include="Source\UserInterface\ConsoleUi.cs" />
