@@ -139,13 +139,13 @@ namespace Samarium.PluginFramework.Logger {
 
 		#region IDisposable
 		/// <summary>
-		/// Releases all resource used by the <see cref="T:De.Nwt.MailArchive.Logging.Logger"/> object.
+		/// Releases all resource used by the <see cref="T:Samarium.PluginFramework.Logger.Logger"/> object.
 		/// </summary>
-		/// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="T:De.Nwt.MailArchive.Logging.Logger"/>. The
-		/// <see cref="Dispose"/> method leaves the <see cref="T:De.Nwt.MailArchive.Logging.Logger"/> in an unusable state.
+		/// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="T:Samarium.PluginFramework.Logger.Logger"/>. The
+		/// <see cref="Dispose"/> method leaves the <see cref="T:Samarium.PluginFramework.Logger.Logger"/> in an unusable state.
 		/// After calling <see cref="Dispose"/>, you must release all references to the
-		/// <see cref="T:De.Nwt.MailArchive.Logging.Logger"/> so the garbage collector can reclaim the memory that the
-		/// <see cref="T:De.Nwt.MailArchive.Logging.Logger"/> was occupying.</remarks>
+		/// <see cref="T:Samarium.PluginFramework.Logger.Logger"/> so the garbage collector can reclaim the memory that the
+		/// <see cref="T:Samarium.PluginFramework.Logger.Logger"/> was occupying.</remarks>
 		public void Dispose() {
 			try {
 				instances.Remove(LoggerName);
@@ -231,7 +231,7 @@ namespace Samarium.PluginFramework.Logger {
 		internal static List<StringBuilder> LogBuffers { get; set; } = new List<StringBuilder>();
 
 		/// <summary>
-		/// Gets or sets a value indicating whether this <see cref="T:De.Nwt.MailArchive.Logging.Logger"/> logger alive.
+		/// Gets or sets a value indicating whether this <see cref="T:Samarium.PluginFramework.Logger.Logger"/> logger alive.
 		/// </summary>
 		/// <value><c>true</c> if logger alive; otherwise, <c>false</c>.</value>
 		public static bool LoggerAlive { get; set; } = true;
@@ -264,7 +264,7 @@ namespace Samarium.PluginFramework.Logger {
                     sWriter.Flush();
                 }
 			} catch (Exception) {
-				GetInstance("MailArchive").Fatal($"Could not flush buffer for { LoggerName }!");
+				GetInstance("Samarium").Fatal($"Could not flush buffer for { LoggerName }!");
 			}
 		}
 
