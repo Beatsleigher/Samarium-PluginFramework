@@ -70,6 +70,8 @@
     <Compile Include="Source\Delegates.cs" />
     <Compile Include="Source\Exceptions\CommandNotFoundException.cs" />
     <Compile Include="Source\Extensions.cs" />
+    <Compile Include="Source\Logger\Classes\Logger.cs" />
+    <Compile Include="Source\Logger\Enum\LogLevel.cs" />
     <Compile Include="Source\Plugin\IPlugin.cs" />
     <Compile Include="Source\Plugin\Plugin.cs" />
     <Compile Include="Source\Plugin\PluginRegistry.cs" />
