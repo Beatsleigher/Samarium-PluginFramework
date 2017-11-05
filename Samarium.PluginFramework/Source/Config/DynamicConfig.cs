@@ -17,21 +17,21 @@ namespace Samarium.PluginFramework.Config {
 
         public event ConfigsLoadedEventHandler ConfigsLoaded;
 
-        public static DirectoryInfo ConfigDirectory { get; }
-
-        static DynamicConfig() {
-            ConfigDirectory = new DirectoryInfo(Path.GetDirectoryName(typeof(DynamicConfig).Assembly.Location));
-        }
+        public DirectoryInfo ConfigDirectory { get; }
 
         Dictionary<string, object> cfgHashMap;
         FileInfo cfgFile;
 
-        public DynamicConfig(string name, string defConfigs) {
+        public DynamicConfig(DirectoryInfo configDir, string name, string defConfigs) {
+            ConfigDirectory = configDir;
             Name = name;
 
             cfgFile = new FileInfo(Path.Combine(ConfigDirectory.FullName, Name));
+
+            Init(defConfigs);
         }
-        public DynamicConfig(string name, FileInfo defConfigs): this(name, File.ReadAllText(defConfigs.FullName)) { }
+
+        public DynamicConfig(string configDir, string name, FileInfo defConfigs): this(new DirectoryInfo(configDir), name, File.ReadAllText(defConfigs.FullName)) { }
 
         void Init(string defConfig) {
             if (!cfgFile.Exists) {
@@ -104,5 +104,15 @@ namespace Samarium.PluginFramework.Config {
             cfgHashMap.Add(key, value);
 
         }
+
+        public IEnumerable<T> Where<T>(Func<string, bool> predicate) {
+            List<T> values = new List<T>();
+
+            foreach (var key in Keys.Where(predicate))
+                values.Add(GetConfig<T>(key));
+
+            return values;
+        }
+
     }
 }

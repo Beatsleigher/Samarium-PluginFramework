@@ -2,6 +2,8 @@
 
 namespace Samarium.PluginFramework.Command {
 
+    using Plugin;
+
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;

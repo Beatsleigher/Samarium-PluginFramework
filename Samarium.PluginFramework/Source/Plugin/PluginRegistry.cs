@@ -2,11 +2,10 @@
 
 namespace Samarium.PluginFramework.Plugin {
 
-    using log4net;
-
-    using Samarium.PluginFramework.Command;
-    using Samarium.PluginFramework.Config;
-    using Samarium.PluginFramework.Exceptions;
+    using Command;
+    using Config;
+    using Exceptions;
+    using Logger;
 
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -17,19 +16,22 @@ namespace Samarium.PluginFramework.Plugin {
     /// <summary>Plugin registry.</summary>
     public class PluginRegistry {
 
-        private ILog log = LogManager.GetLogger("Samarium");
+        private Logger log;
         private Dictionary<Assembly, Type> listOfPlugins;
         private List<IPlugin> pluginInstances;
         private List<ICommand> systemCommands;
-
+        
         /// <summary>Gets the instance.</summary>
         /// <value>The instance.</value>
-        public static PluginRegistry Instance { get; } = new PluginRegistry();
+        public static PluginRegistry Instance { get; private set; }
 
-        internal PluginRegistry() {
+        public static PluginRegistry CreateInstance(IConfig config) => Instance ?? (Instance = new PluginRegistry(config));
+
+        internal PluginRegistry(IConfig config) {
+            SystemConfig = config;
             listOfPlugins = new Dictionary<Assembly, Type>();
             pluginInstances = new List<IPlugin>();
-
+            log = Logger.CreateInstance(nameof(PluginRegistry), SystemConfig.GetString("log_directory"));
         }
 
         public async Task<ICommandResult> ExecuteCommandAsync(string commandTag, params string[] args) {
@@ -53,7 +55,7 @@ namespace Samarium.PluginFramework.Plugin {
 
         /// <summary>Gets or sets the system config.</summary>
         /// <value>The system config.</value>
-        public IConfig SystemConfig { internal get; set; }
+        public IConfig SystemConfig { get; private set; }
 
         /// <summary>Gets the list of plugins.</summary>
         /// <value>The list of plugins.</value>

@@ -22,7 +22,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// Constructor; instantiates an instance of this class. 
         /// </summary>
         protected Plugin() {
-            log = Logger.CreateInstance(PluginName, null, PluginRegistry.Instance.SystemConfig.GetString("log_directory"));
+            log = Logger.CreateInstance(PluginName, PluginRegistry.Instance.SystemConfig.GetString("log_directory"));
             CommandExecutionRequested += Plugin_CommandExecutionRequested;
         }
 

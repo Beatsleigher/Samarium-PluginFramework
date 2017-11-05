@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace Samarium.PluginFramework {
+namespace Samarium.PluginFramework.Plugin {
 
     using Samarium.PluginFramework.Command;
     

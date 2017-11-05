@@ -2,10 +2,12 @@
 
 namespace Samarium.PluginFramework {
 
+    using Command;
+    using Config;
+    using Plugin;
+
     using JetBrains.Annotations;
 
-    using Samarium.PluginFramework.Command;
-    using Samarium.PluginFramework.Config;
 
     /// <summary>
     /// Delegate for handling command execution requests from plugins.
@@ -22,7 +24,7 @@ namespace Samarium.PluginFramework {
     /// <param name="parentCommand"></param>
     /// <param name="execArgs"></param>
     /// <returns></returns>
-    public delegate ICommandResult CommandExecutedHandler([NotNull]IPlugin sender, ICommand parentCommand, params string[] execArgs);
+    public delegate ICommandResult CommandExecutedHandler(IPlugin sender, ICommand parentCommand, params string[] execArgs);
 
     /// <summary>
     /// Handler delegate for handling <see cref="IConfig.ConfigSet"/> events.

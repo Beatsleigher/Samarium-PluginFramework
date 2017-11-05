@@ -18,14 +18,10 @@ namespace Samarium.PluginFramework.Logger {
 	public sealed class Logger: INotifyPropertyChanged, IDisposable {
 
 		readonly static object Lock = "U iz lawked  (╯°□°) ╯ ┻━┻ ";
-        readonly Mutex mutex;
 
-		Logger(string name, Mutex mutex) : this(name, $"./logs/", mutex) { }
-
-		Logger(string name, string logFilePath, Mutex _mutex) {
+		Logger(string name, string logFilePath) {
 			LoggerName = name;
 			LogFilePath = logFilePath;
-            mutex = _mutex;
             PrintToConsole = SystemConfig?.GetBool("log_to_console") ?? true;
             PrintToFile = SystemConfig?.GetBool("log_to_file") ?? true;
             if (SystemConfig != null) {
@@ -83,22 +79,11 @@ namespace Samarium.PluginFramework.Logger {
 		/// </summary>
 		/// <returns>The instance.</returns>
 		/// <param name="name">Name.</param>
-        /// <param name="mutex" >The mutex to use.</param>
-		public static Logger GetInstance(string name, Mutex mutex = null) {
-			if (instances.ContainsKey(name)) {
-				Logger logger = null;
-				if (instances?.TryGetValue(name, out logger) == true)
-					return logger;
+		public static Logger GetInstance(string name) {
+            if (instances.TryGetValue(name, out var logger))
+                return logger;
 
-				logger = new Logger(name, mutex);
-				instances?.Add(name, logger);
-				return logger;
-
-			} else {
-				var logger = new Logger(name, mutex);
-				instances?.Add(name, logger);
-				return logger;
-			}
+            throw new ArgumentNullException(nameof(name), "Could not find logger!");
 		}
 
 		/// <summary>
@@ -106,9 +91,8 @@ namespace Samarium.PluginFramework.Logger {
 		/// </summary>
 		/// <returns>The instance.</returns>
 		/// <param name="name">Name.</param>
-        /// <param name="mutex" >Mutex object for this class</param>
 		/// <param name="logFilePath">Log file path.</param>
-		public static Logger CreateInstance(string name, Mutex mutex, string logFilePath = "./logs/") {
+		public static Logger CreateInstance(string name, string logFilePath) {
 			if (instances?.ContainsKey(name) == true) {
 				Logger logger = null;
 				instances?.TryGetValue(name, out logger);
@@ -119,7 +103,7 @@ namespace Samarium.PluginFramework.Logger {
 				instances?.Add(name, logger);
 				return logger;
 			} else {
-				var logger = new Logger(name, logFilePath, mutex);
+				var logger = new Logger(name, logFilePath);
 				instances?.Add(name, logger);
 				return logger;
 			}
@@ -291,8 +275,6 @@ namespace Samarium.PluginFramework.Logger {
 		/// <param name="newLine">If set to <c>true</c> new line.</param>
 		public void Log(LogLevel level, string msg, bool newLine = true) {
 			lock (Lock) {
-
-                //mutex?.WaitOne();
 #if !DEBUG
 			if (level == LogLevel.Debug || level == LogLevel.Trace)
 				return;
@@ -380,8 +362,6 @@ namespace Samarium.PluginFramework.Logger {
                         sWriter.Flush();
 					}
 				}
-
-                //mutex?.ReleaseMutex();
             }
 		}
 
@@ -454,7 +434,7 @@ namespace Samarium.PluginFramework.Logger {
         /// If the config has already been set, the new instance will be ignored to prevent catastrophic failure.
         /// </summary>
         /// <param name="cfg">The new config object.</param>
-        public Logger SetConfig(BaseConfig cfg) {
+        public Logger SetConfig(IConfig cfg) {
             SystemConfig = SystemConfig == null ? cfg : SystemConfig;
             return this;
         }

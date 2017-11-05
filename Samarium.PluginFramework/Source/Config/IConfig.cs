@@ -106,5 +106,13 @@ namespace Samarium.PluginFramework.Config {
         /// <param name="value">The (new) value of the config.</param>
         void SetConfig<T>(string key, T value);
 
+        /// <summary>
+        /// Gets all configurations where the predicate (keys) return true.
+        /// </summary>
+        /// <typeparam name="T">The config type</typeparam>
+        /// <param name="predicate">The filter</param>
+        /// <returns>A list of all configs where the predictate returned true.</returns>
+        IEnumerable<T> Where<T>(Func<string, bool> predicate);
+
     }
 }
