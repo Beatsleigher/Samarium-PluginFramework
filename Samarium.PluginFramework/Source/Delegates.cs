@@ -8,6 +8,7 @@ namespace Samarium.PluginFramework {
 
     using JetBrains.Annotations;
 
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Delegate for handling command execution requests from plugins.
@@ -15,7 +16,16 @@ namespace Samarium.PluginFramework {
     /// <param name="sender">The calling plugin.</param>
     /// <param name="requestedCommand">The command requested for execution.</param>
     /// <returns></returns>
-    public delegate ICommandResult CommandExecutionRequestedHandler(IPlugin sender, ICommand requestedCommand, params string[] execArgs);
+    public delegate ICommandResult CommandExecutionRequestedHandler(IPlugin sender, string requestedCommand, params string[] execArgs);
+
+    /// <summary>
+    /// Delegate for asynchronous handling of command execution requests from plugins.
+    /// </summary>
+    /// <param name="sender">The request sender.</param>
+    /// <param name="requestedCommand">The command requested for execution</param>
+    /// <param name="execArgs">The command's arguments.</param>
+    /// <returns>The command's result.</returns>
+    public delegate Task<ICommandResult> AsyncCommandExecutionRequestedHandler(IPlugin sender, string requestedCommand, params string[] execArgs);
 
     /// <summary>
     /// Handler delegate for command actions.

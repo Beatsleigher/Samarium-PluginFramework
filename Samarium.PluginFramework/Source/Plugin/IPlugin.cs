@@ -67,5 +67,19 @@ namespace Samarium.PluginFramework.Plugin {
         /// <returns><code >true</code> if the command was found in this plugin.</returns>
         bool HasCommand(string commandTag);
 
+        /// <summary>
+        /// Attempts to get a command from this plugin.
+        /// </summary>
+        /// <param name="command">The command to retrieve.</param>
+        /// <returns>The command.</returns>
+        ICommand GetCommand(ICommand command);
+
+        /// <summary>
+        /// Attempts to get a command from this plugin.
+        /// </summary>
+        /// <param name="commandTag">The command to retrieve.</param>
+        /// <returns>The command.</returns>
+        ICommand GetCommand(string commandTag);
+
     }
 }

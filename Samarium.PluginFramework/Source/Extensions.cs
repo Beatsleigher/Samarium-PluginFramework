@@ -22,11 +22,34 @@ namespace Samarium.PluginFramework {
         private const int DerivationIterations = 1000;
 
         /// <summary>
+        /// Splits a string in to command-line-type arguments.
+        /// </summary>
+        /// <param name="commandLine">The string to split.</param>
+        /// <returns>The split string.</returns>
+        /// <remarks >
+        /// Thanks to Stackoverflow user Daniel Earwicker!
+        /// </remarks>
+        public static IEnumerable<string> SplitCommandLine(this string commandLine) {
+            bool inQuotes = false;
+
+            return commandLine.Split(c => {
+                if (c == '"')
+                    inQuotes = !inQuotes;
+
+                return !inQuotes && c == ' ';
+            }).Select(arg => arg.Trim().TrimMatchingQuotes())
+              .Where(arg => !string.IsNullOrEmpty(arg));
+        }
+
+        /// <summary>
         /// Splits the specified controller.
         /// </summary>
         /// <param name="str">The string.</param>
         /// <param name="controller">The controller.</param>
         /// <returns></returns>
+        /// <remarks >
+        /// Thanks to Stackoverflow user Daniel Earwicker!
+        /// </remarks>
         public static IEnumerable<string> Split(this string str, Func<char, bool> controller) {
             int nextPiece = 0;
 
@@ -46,6 +69,9 @@ namespace Samarium.PluginFramework {
         /// <param name="input">The input.</param>
         /// <param name="quote">The quote.</param>
         /// <returns></returns>
+        /// <remarks >
+        /// Thanks to Stackoverflow user Daniel Earwicker!
+        /// </remarks>
         public static string TrimMatchingQuotes(this string input, char quote = '"') {
             if ((input.Length >= 2) &&
                 (input[0] == quote) && (input[input.Length - 1] == quote))

@@ -20,6 +20,16 @@ namespace Samarium.PluginFramework.Plugin {
         private Dictionary<Assembly, Type> listOfPlugins;
         private List<IPlugin> pluginInstances;
         private List<ICommand> systemCommands;
+
+        /// <summary>
+        /// CommandExecutionRequested event; is called and fired when a plugin requests a command be executed.
+        /// </summary>
+        public event CommandExecutionRequestedHandler CommandExecutionRequested;
+
+        /// <summary>
+        /// AsyncCommandExecutionRequested event; is called and fired when a plugin requests a command be executed asynchronously.
+        /// </summary>
+        public event AsyncCommandExecutionRequestedHandler AsyncCommandExecutionRequested;
         
         /// <summary>Gets the instance.</summary>
         /// <value>The instance.</value>
@@ -34,24 +44,9 @@ namespace Samarium.PluginFramework.Plugin {
             log = Logger.CreateInstance(nameof(PluginRegistry), SystemConfig.GetString("log_directory"));
         }
 
-        public async Task<ICommandResult> ExecuteCommandAsync(string commandTag, params string[] args) {
-            var command = MainSystemCommands.FirstOrDefault(x => x.CommandTag.ToLowerInvariant() == commandTag.ToLowerInvariant());
+        public async Task<ICommandResult> ExecuteCommandAsync(IPlugin caller, string commandTag, params string[] args) => await AsyncCommandExecutionRequested?.Invoke(caller, commandTag, args);
 
-            if (command is default) {
-                command = PluginInstances
-                    .FirstOrDefault(x => x.HasCommand(commandTag.ToLowerInvariant()))?
-                    .PluginCommands.FirstOrDefault(x => x.CommandTag.ToLowerInvariant() == commandTag.ToLowerInvariant());
-            }
-
-            if (command is default) {
-                throw new CommandNotFoundException(commandTag, "Could not find command!");
-            }
-
-            return await command.ExecuteAsync(args);
-
-        }
-
-        public ICommandResult ExecuteCommand(string commandTag, params string[] args) => ExecuteCommandAsync(commandTag, args).Result;
+        public ICommandResult ExecuteCommand(IPlugin caller, string commandTag, params string[] args) => CommandExecutionRequested?.Invoke(caller, commandTag, args);
 
         /// <summary>Gets or sets the system config.</summary>
         /// <value>The system config.</value>

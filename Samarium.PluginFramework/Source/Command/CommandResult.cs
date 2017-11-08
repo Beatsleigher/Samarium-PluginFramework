@@ -1,28 +1,23 @@
 ﻿using System;
 
 namespace Samarium.PluginFramework.Command {
-
+    
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
 
-    public interface ICommandResult {
+    public class CommandResult<T> : ICommandResult<T> {
+
+        /// <summary>
+        /// Gets this command result's result.
+        /// </summary>
+        public T Result { get; set; }
 
         /// <summary>
         /// Gets this command result's message.
         /// </summary>
-        string Message { get; set; }
+        public string Message { get; set; }
 
     }
-
-    public interface ICommandResult<T>: ICommandResult {
-
-        /// <summary>
-        /// Gets the command's result.
-        /// </summary>
-        T Result { get; set; }
-
-    }
-
 }

@@ -14,8 +14,6 @@ namespace Samarium.PluginFramework.Plugin {
 
     public abstract class Plugin : IPlugin {
 
-        internal static event CommandExecutionRequestedHandler CommandExecutionRequested;
-
         private readonly Logger log;
 
         /// <summary>
@@ -23,7 +21,6 @@ namespace Samarium.PluginFramework.Plugin {
         /// </summary>
         protected Plugin() {
             log = Logger.CreateInstance(PluginName, PluginRegistry.Instance.SystemConfig.GetString("log_directory"));
-            CommandExecutionRequested += Plugin_CommandExecutionRequested;
         }
 
         private ICommandResult Plugin_CommandExecutionRequested(IPlugin sender, ICommand requestedCommand, params string[] execArgs) {
@@ -120,6 +117,38 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="commandTag">A command to check against.</param>
         /// <returns><code >true</code> if the command was found in this plugin.</returns>
         public bool HasCommand(string commandTag) => HasCommand(new Command { CommandTag = commandTag });
+
+        /// <summary>
+        /// Attempts to get a command from this plugin.
+        /// </summary>
+        /// <param name="command">The command to retrieve.</param>
+        /// <returns>The command.</returns>
+        public ICommand GetCommand(ICommand command) => PluginCommands?.FirstOrDefault(x => x.CommandTag == command.CommandTag);
+
+        /// <summary>
+        /// Attempts to get a command from this plugin.
+        /// </summary>
+        /// <param name="commandTag">The command to retrieve.</param>
+        /// <returns>The command.</returns>
+        public ICommand GetCommand(string commandTag) => GetCommand(new Command { CommandTag = commandTag });
+
+        /// <summary>
+        /// Execute a command in Samarium.
+        /// This command can be one of your own, a Samarium command, or even a command from another plugin!
+        /// </summary>
+        /// <param name="commandTag">The command's tag.</param>
+        /// <param name="args">The arguments for the command in string form.</param>
+        /// <returns>The command's result.</returns>
+        protected ICommandResult ExecuteCommand(string commandTag, params string[] args) => PluginRegistry.Instance.ExecuteCommand(this, commandTag, args);
+
+        /// <summary>
+        /// Executes a command in Samarium asynchronously.
+        /// This command can be one of your own, a Samarium command, or even a command from another plugin.
+        /// </summary>
+        /// <param name="commandTag">The command to execute.</param>
+        /// <param name="args">The command's arguments.</param>
+        /// <returns>The command's result.</returns>
+        protected async Task<ICommandResult> ExecuteCommandAsync(string commandTag, params string[] args) => await PluginRegistry.Instance.ExecuteCommandAsync(this, commandTag, args);
         #endregion
 
     }
