@@ -94,6 +94,12 @@ namespace Samarium.PluginFramework.Config {
         void LoadConfigs();
 
         /// <summary>
+        /// Loads the default configurations in to memory, replacing the old configs.
+        /// This change is temporary, until they are saved to disk; when they become permanent.
+        /// </summary>
+        void LoadDefaults();
+
+        /// <summary>
         /// Saves all configurations modified in memory to disk.
         /// </summary>
         void SaveConfigs();
@@ -113,6 +119,13 @@ namespace Samarium.PluginFramework.Config {
         /// <param name="predicate">The filter</param>
         /// <returns>A list of all configs where the predictate returned true.</returns>
         IEnumerable<T> Where<T>(Func<string, bool> predicate);
+
+        /// <summary>
+        /// Gets a string representation of the configurations stored in this object.
+        /// </summary>
+        /// <param name="serializationType">The serialisation language to serialise to. Default: YAML</param>
+        /// <returns>The serialised data stored in this object.</returns>
+        string ToString(ConfigSerializationType serializationType = ConfigSerializationType.Yaml);
 
     }
 }

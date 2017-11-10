@@ -2,6 +2,10 @@
 
 namespace Samarium.PluginFramework.Config {
 
+    using Newtonsoft.Json;
+
+    using ServiceStack.Text;
+
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -10,6 +14,7 @@ namespace Samarium.PluginFramework.Config {
     
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.NamingConventions;
+    using YamlDotNet.Serialization.NodeDeserializers;
 
     public class DynamicConfig : IConfig {
 
@@ -21,17 +26,22 @@ namespace Samarium.PluginFramework.Config {
 
         Dictionary<string, object> cfgHashMap;
         FileInfo cfgFile;
+        FileInfo defCfgFile;
 
         public DynamicConfig(DirectoryInfo configDir, string name, string defConfigs) {
             ConfigDirectory = configDir;
             Name = name;
 
             cfgFile = new FileInfo(Path.Combine(ConfigDirectory.FullName, Name));
-
+            if (defCfgFile is default)
+                defCfgFile = new FileInfo(Path.Combine(ConfigDirectory.FullName, string.Concat(Name.Replace(Path.GetExtension(Name), ""), ".def", Path.GetExtension(Name))));
+            
             Init(defConfigs);
         }
 
-        public DynamicConfig(string configDir, string name, FileInfo defConfigs): this(new DirectoryInfo(configDir), name, File.ReadAllText(defConfigs.FullName)) { }
+        public DynamicConfig(string configDir, string name, FileInfo defConfigs): this(new DirectoryInfo(configDir), name, File.ReadAllText(defConfigs.FullName)) {
+            defCfgFile = defConfigs;
+        }
 
         void Init(string defConfig) {
             if (!cfgFile.Exists) {
@@ -77,7 +87,21 @@ namespace Samarium.PluginFramework.Config {
             using (var reader = cfgFile.OpenText()) {
                 cfgHashMap = deserializer.Deserialize<Dictionary<string, object>>(reader);
             }
+            return;
+        }
 
+        /// <summary>
+        /// Loads the default configurations in to memory, replacing the old configs.
+        /// This change is temporary, until they are saved to disk; when they become permanent.
+        /// </summary>
+        public void LoadDefaults() {
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(new UnderscoredNamingConvention())
+                .Build();
+
+            using (var reader = defCfgFile.OpenText()) {
+                cfgHashMap = deserializer.Deserialize<Dictionary<string, object>>(reader);
+            }
         }
 
         public async void SaveConfigs() {
@@ -112,6 +136,21 @@ namespace Samarium.PluginFramework.Config {
                 values.Add(GetConfig<T>(key));
 
             return values;
+        }
+
+        public string ToString(ConfigSerializationType serializationType = ConfigSerializationType.Yaml) {
+            switch (serializationType) {
+                case ConfigSerializationType.Yaml:
+                    return new SerializerBuilder().WithNamingConvention(new UnderscoredNamingConvention()).Build().Serialize(cfgHashMap);
+                case ConfigSerializationType.Json:
+                    return JsonConvert.SerializeObject(cfgHashMap, Formatting.Indented);
+                case ConfigSerializationType.CSV:
+                    return CsvSerializer.SerializeToCsv(cfgHashMap);
+                case ConfigSerializationType.XML:
+                    return XmlSerializer.SerializeToString(cfgHashMap);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(serializationType), "Invalid serialization type!");
+            }
         }
 
     }

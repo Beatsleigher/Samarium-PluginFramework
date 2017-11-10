@@ -82,26 +82,21 @@ namespace Samarium.PluginFramework.Plugin {
         /// <summary>Removes the plugin from the plugin registry.</summary>
         /// <returns>The plugin.</returns>
         /// <param name="assembly">Assembly.</param>
-        public bool RemovePlugin(Assembly assembly) {
-            Type type = (Type)null;
-            this.ListOfPlugins.TryGetValue(assembly, out type);
-            if (!(bool)type.GetMethod("OnStop").Invoke(Activator.CreateInstance(type), (object[])null))
-                return false;
-            this.ListOfPlugins.Remove(assembly);
-            return true;
-        }
+        public bool RemovePlugin(Assembly assembly) => RemovePlugin(PluginInstances.FirstOrDefault(x => x.GetType().Assembly == assembly));
 
         /// <summary>Removes the plugin.</summary>
         /// <returns><c>true</c>, if plugin was removed, <c>false</c> otherwise.</returns>
         /// <param name="pluginClass">Plugin class.</param>
         public bool RemovePlugin(IPlugin pluginClass) {
-            Type type = (Type)null;
-            this.ListOfPlugins.TryGetValue(pluginClass.GetType().Assembly, out type);
-            Assembly assembly = pluginClass.GetType().Assembly;
-            if (type == (Type)null)
+            if (pluginClass is default)
+                throw new ArgumentNullException(nameof(pluginClass), "Plugin class reference must not be null!");
+
+            ListOfPlugins.TryGetValue(pluginClass.GetType().Assembly, out var type);
+            var assembly = pluginClass.GetType().Assembly;
+            if (type is default)
                 return false;
-            this.ListOfPlugins.Remove(assembly);
-            this.pluginInstances.Remove(pluginClass);
+            ListOfPlugins.Remove(assembly);
+            pluginInstances.Remove(pluginClass);
             return pluginClass.OnStop();
         }
 
@@ -184,26 +179,20 @@ namespace Samarium.PluginFramework.Plugin {
         /// <summary>Gets an instance of a Plugin class.</summary>
         /// <returns>The instance.</returns>
         /// <param name="pluginName">Plugin name.</param>
-        public Plugin GetInstance(string pluginName) {
-            foreach (Plugin pluginInstance in this.pluginInstances) {
-                if (pluginInstance.PluginName.ToLower().Equals(pluginName.ToLower()))
-                    return pluginInstance;
-            }
-            return (Plugin)null;
-        }
+        public IPlugin GetInstance(string pluginName) => PluginInstances.FirstOrDefault(x => x.PluginName.ToLowerInvariant() == pluginName.ToLowerInvariant());
 
         /// <summary>Gets an instance of the Plugin class.</summary>
         /// <returns>The instance.</returns>
         /// <param name="index">Index.</param>
         public IPlugin GetInstance(int index) {
-            return this.pluginInstances[index];
+            return pluginInstances[index];
         }
 
         /// <summary>Gets an instance of the Plugin class.</summary>
         /// <returns>The instance.</returns>
         /// <param name="assembly">Assembly.</param>
-        public Plugin GetInstance(Assembly assembly) {
-            return this.GetInstance(assembly.GetName().ToString().ToLowerInvariant().Split(',')[0].Trim());
+        public IPlugin GetInstance(Assembly assembly) {
+            return GetInstance(assembly.GetName().ToString().ToLowerInvariant().Split(',')[0].Trim());
         }
 
         /// <summary>
@@ -256,6 +245,19 @@ namespace Samarium.PluginFramework.Plugin {
             })))
                 tupleList.Add(new Tuple<string, string[], Dictionary<string, string[]>>(command.CommandTag, command.Arguments, command.Switches));
             return tupleList;
+        }
+
+        /// <summary>
+        /// Gets all the commands from all plugins loaded in to Samarium.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ICommand> GetAllCommands() {
+            var cmdList = new List<ICommand>();
+
+            foreach (var plugin in PluginInstances)
+                cmdList.AddRange(plugin.PluginCommands);
+
+            return cmdList;
         }
     }
 }

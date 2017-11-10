@@ -48,12 +48,73 @@ namespace Samarium.PluginFramework.Command {
         public Dictionary<string, string[]> Switches { get; set; }
         public CommandExecutedHandler Handler { get; set; }
 
+        /// <summary>
+        /// Executes the command.
+        /// </summary>
+        /// <param name="args">The arguments the command should use.</param>
+        /// <returns>The command's result.</returns>
         public ICommandResult Execute(params string[] args) => Handler?.Invoke(ParentPlugin, this, args);
+
+        /// <summary>
+        /// Executes the command asynchronously.
+        /// </summary>
+        /// <param name="args">The arguments the command should use.</param>
+        /// <returns>The command's result.</returns>
         public async Task<ICommandResult> ExecuteAsync(params string[] args) => await Task.Run(() => Execute(args));
+
+        /// <summary>
+        /// Executes the command without returning its result.
+        /// </summary>
+        /// <param name="args">The arguments the command should use.</param>
         public void ExecuteNoReturn(params string[] args) => Execute(args);
+
+        /// <summary>
+        /// Executes the command asynchronously without returning its result.
+        /// </summary>
+        /// <param name="args">The arguments the command should use.</param>
+        /// <returns>The command's result.</returns>
         public async Task ExecuteNoReturnAsync(params string[] args) => await Task.Run(() => ExecuteNoReturn(args));
-        public bool IsArgument(string arg) => Arguments.Contains(arg);
+
+        /// <summary>
+        /// Gets a value indicating whether a given string is a valid argument for this command.
+        /// </summary>
+        /// <param name="arg">The string to check against.</param>
+        /// <returns><code >true</code> if the passed string is a valid argument.</returns>
+        public bool IsArgument(string arg) => Arguments.Contains(arg.Split(' ')[0]);
+
+        /// <summary>
+        /// Gets a value indicating whether a given string is a valid switch for this command.
+        /// </summary>
+        /// <param name="switch">The string to check against.</param>
+        /// <returns><code >true</code> if the passed string is a valid switch.</returns>
         public bool IsSwitch(string @switch) => Switches.ContainsKey(@switch);
-        public void SortArgs(out IEnumerable<string> parameters, out IEnumerable<string> arguments, out Dictionary<string, string> switches, IEnumerable<string> cmdArgs) => throw new NotImplementedException();
+
+        /// <summary>
+		/// Sorts the arguments.
+		/// </summary>
+		/// <param name="parameters">Parameters.</param>
+		/// <param name="arguments">Arguments.</param>
+		/// <param name="switches">Switches.</param>
+		/// <param name="cmdArgs">Cmd arguments.</param>
+		public void SortArgs(out IEnumerable<string> parameters, out IEnumerable<string> arguments, out Dictionary<string, string> switches, IEnumerable<string> cmdArgs) {
+            var _parameters = new List<string>();
+            var _arguments = new List<string>();
+            var _switches = new Dictionary<string, string>();
+
+            foreach (var arg in cmdArgs) {
+                if (IsArgument(arg) == true) {
+                    _arguments.Add(arg);
+                } else if (IsSwitch(arg) == true) {
+                    var split = arg.Split(new[] { '=' }, 2); // Split at the = character; return max 2 substrings
+                    _switches.Add(split[0], split[1]);
+                } else {
+                    _parameters.Add(arg);
+                }
+            }
+
+            arguments = _arguments;
+            parameters = _parameters;
+            switches = _switches;
+        }
     }
 }

@@ -7,7 +7,18 @@ namespace Samarium.PluginFramework.Command {
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Represents the result of a command executed within Samarium.
+    /// </summary>
+    /// <typeparam name="T">The type contained within the result.</typeparam>
     public class CommandResult<T> : ICommandResult<T> {
+
+        public CommandResult() { }
+
+        public CommandResult(string msg, T result) {
+            Message = msg;
+            Result = result;
+        }
 
         /// <summary>
         /// Gets this command result's result.

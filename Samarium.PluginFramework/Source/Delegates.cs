@@ -6,8 +6,6 @@ namespace Samarium.PluginFramework {
     using Config;
     using Plugin;
 
-    using JetBrains.Annotations;
-
     using System.Threading.Tasks;
 
     /// <summary>
@@ -41,12 +39,12 @@ namespace Samarium.PluginFramework {
     /// </summary>
     /// <param name="sender">The calling <see cref="IConfig"/> object</param>
     /// <param name="key">The key of the modified config.</param>
-    public delegate void ConfigSetEventHandler([NotNull]IConfig sender, string key);
+    public delegate void ConfigSetEventHandler(IConfig sender, string key);
 
     /// <summary>
     /// Handler delegate for handling the (re-)loading of configurations.
     /// </summary>
     /// <param name="sender">The calling <see cref="IConfig"/> object.</param>
-    public delegate void ConfigsLoadedEventHandler([NotNull]IConfig sender);
+    public delegate void ConfigsLoadedEventHandler(IConfig sender);
 
 }

@@ -1,7 +1,8 @@
 ﻿using System;
 
 namespace Samarium.PluginFramework {
-
+    using Newtonsoft.Json;
+    using ServiceStack.Text;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -11,6 +12,8 @@ namespace Samarium.PluginFramework {
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using YamlDotNet.Serialization;
+    using YamlDotNet.Serialization.NamingConventions;
 
     public static class Extensions {
 
@@ -411,5 +414,32 @@ namespace Samarium.PluginFramework {
             context.StatusDescription = $"{ (int)statusCode } redirect to { newLocation.AbsoluteUri }";
             return context;
         }
+
+        /// <summary>
+        /// Adds a range of elements to an existing list.
+        /// </summary>
+        /// <typeparam name="T">The type of element to add to the list.</typeparam>
+        /// <param name="enumerable">The list.</param>
+        /// <param name="objs">The new elements.</param>
+        /// <returns>The updated list.</returns>
+        public static List<T> AddRange<T>(this List<T> enumerable, params T[] objs) {
+            enumerable.AddRange(objs);
+
+            return enumerable;
+        }
+
+        public static string Serialize<T>(this T obj, ConfigSerializationType serializationType = ConfigSerializationType.Yaml) {
+            switch (serializationType) {
+                case ConfigSerializationType.Yaml:
+                    return new SerializerBuilder().WithNamingConvention(new UnderscoredNamingConvention()).Build().Serialize(obj);
+                case ConfigSerializationType.Json:
+                    return JsonConvert.SerializeObject(obj, Formatting.Indented);
+                case ConfigSerializationType.XML:
+                    return XmlSerializer.SerializeToString(obj);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(serializationType), "Invalid serialization type!");
+            }
+        }
+
     }
 }
