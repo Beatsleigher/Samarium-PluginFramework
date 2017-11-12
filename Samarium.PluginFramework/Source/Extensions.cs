@@ -23,6 +23,32 @@ namespace Samarium.PluginFramework {
 
         // This constant determines the number of iterations for the password bytes generation function.
         private const int DerivationIterations = 1000;
+        
+        static Regex YamlBoolRegex { get; }
+
+        static Regex YamlYesRegex { get; }
+
+        static Regex YamlNoRegex { get; }
+
+        static Extensions() {
+            YamlBoolRegex = new Regex(
+                @"y|Y|yes|Yes|YES|n|N|no|No|NO|true|True|TRUE|false|False|FALSE|on|On|ON|off|Off|OFF",
+                RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant
+            );
+
+            YamlYesRegex = new Regex(
+                @"yes|Yes|YES|y|Y",
+                RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant
+            );
+
+            YamlNoRegex = new Regex(
+                @"no|No|NO|n|N",
+                RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant
+            );
+        }
+
+        const string TrueString = "true";
+        const string FalseString = "false";
 
         /// <summary>
         /// Splits a string in to command-line-type arguments.
@@ -439,6 +465,16 @@ namespace Samarium.PluginFramework {
                 default:
                     throw new ArgumentOutOfRangeException(nameof(serializationType), "Invalid serialization type!");
             }
+        }
+
+        public static string ConvertYamlBool(this string @string) {
+
+            if (YamlYesRegex.IsMatch(@string))
+                return YamlYesRegex.Replace(@string, TrueString);
+            else if (YamlNoRegex.IsMatch(@string))
+                return YamlNoRegex.Replace(@string, FalseString);
+
+            throw new ArgumentException(nameof(@string), "Given string must be a YAML-serialized boolean!");
         }
 
     }

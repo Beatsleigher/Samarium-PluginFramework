@@ -21,7 +21,10 @@ namespace Samarium.PluginFramework.Logger {
 
 		Logger(string name, string logFilePath) {
 			LoggerName = name;
-			LogFilePath = logFilePath;
+            if (logFilePath is default)
+                LogFilePath = SystemConfig?.GetString("log_directory");
+            else
+                LogFilePath = logFilePath;
             PrintToConsole = SystemConfig?.GetBool("log_to_console") ?? true;
             PrintToFile = SystemConfig?.GetBool("log_to_file") ?? true;
             if (SystemConfig != null) {

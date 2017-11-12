@@ -10,6 +10,7 @@ namespace Samarium.PluginFramework.Config {
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     
     using YamlDotNet.Serialization;
@@ -18,10 +19,23 @@ namespace Samarium.PluginFramework.Config {
 
     public class DynamicConfig : IConfig {
 
+        #region Static members
+        public static Regex YamlBoolRegex { get; }
+
+        static DynamicConfig() {
+            YamlBoolRegex = new Regex(
+                @"y|Y|yes|Yes|YES|n|N|no|No|NO|true|True|TRUE|false|False|FALSE|on|On|ON|off|Off|OFF", 
+                RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant
+            );
+        }
+        #endregion
+
+        const string TrueString = "true";
+        const string FalseString = "false";
+
         public event ConfigSetEventHandler ConfigSet;
-
         public event ConfigsLoadedEventHandler ConfigsLoaded;
-
+        
         public DirectoryInfo ConfigDirectory { get; }
 
         Dictionary<string, object> cfgHashMap;
@@ -67,8 +81,14 @@ namespace Samarium.PluginFramework.Config {
 
             if (hasKey && value is T tVal) {
                 return tVal;
-            } else throw new InvalidCastException($"Cannot cast { value.GetType().Name } to { typeof(T).Name }!");
+            } else if (hasKey && (typeof(T) == typeof(bool) && value is string str)) {
+                // Ugly hack to work around YamlDotNet's shortcomings :/
+                str = str.ConvertYamlBool();
+                if (bool.TryParse(str, out var @bool))
+                    return (T)Convert.ChangeType(@bool, typeof(T));
+            }
 
+            throw new InvalidCastException($"Cannot cast { value.GetType().Name } to { typeof(T).Name }!");
         }
 
         public double GetDouble(string key) => GetConfig<double>(key);

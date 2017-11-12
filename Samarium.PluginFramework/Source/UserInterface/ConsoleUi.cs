@@ -176,6 +176,13 @@ namespace Samarium.PluginFramework.UI {
             ConsoleUI.PrintRight(version, 0, 3);
         }
 
+        public static void PrintTopTitle(string title, string version = "") {
+            if (!string.IsNullOrEmpty(title))
+                PrintCentre(title, 0);
+            if (!string.IsNullOrEmpty(version))
+                PrintRight(version, 0, 3);
+        }
+
         public static void PrintBox(uint startX, uint startY, uint width, uint height, BorderType borderType = BorderType.DoubleBorder, CharType topLeftCorner = CharType.TopLeftCorner, CharType topRightCorner = CharType.TopRightCorner, CharType bottomLeftCorner = CharType.BottomLeftCorner, CharType bottomRightCorner = CharType.BottomRightCorner, string title = "") {
             for (int index = 0; (long)index < (long)height; ++index) {
                 ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates((int)startX, index + (int)startY));
