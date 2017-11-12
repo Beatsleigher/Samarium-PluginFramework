@@ -81,6 +81,13 @@ namespace Samarium.PluginFramework.Plugin {
         protected void Info(string format, params object[] args) => log.Info(format, args);
 
         /// <summary>
+        /// Log a message which is shows desirable behavior.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="args"></param>
+        protected void Ok(string format, params object[] args) => log.Ok(format, args);
+
+        /// <summary>
         /// Log a potentially lethal (fatal) message.
         /// E.g. settings could not be loaded.
         /// </summary>
