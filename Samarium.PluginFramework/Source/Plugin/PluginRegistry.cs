@@ -56,7 +56,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// <value>The list of plugins.</value>
         public Dictionary<Assembly, Type> ListOfPlugins {
             get {
-                return this.listOfPlugins;
+                return listOfPlugins;
             }
         }
 
@@ -64,7 +64,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// <value>The plugin instances.</value>
         public List<IPlugin> PluginInstances {
             get {
-                return this.pluginInstances;
+                return pluginInstances;
             }
         }
 
@@ -72,10 +72,10 @@ namespace Samarium.PluginFramework.Plugin {
         /// <value>The main system commands.</value>
         public List<ICommand> MainSystemCommands {
             get {
-                return this.systemCommands;
+                return systemCommands;
             }
             set {
-                this.systemCommands = value;
+                systemCommands = value;
             }
         }
 
@@ -105,8 +105,22 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="pluginAssembly">Plugin assembly.</param>
         /// <param name="pluginClass">Plugin class.</param>
         public void RegisterPlugin(Assembly pluginAssembly, IPlugin pluginClass) {
-            this.listOfPlugins.Add(pluginAssembly, pluginClass.GetType());
-            this.pluginInstances.Add(pluginClass);
+            listOfPlugins.Add(pluginAssembly, pluginClass.GetType());
+            try {
+                pluginClass = (pluginClass as Plugin).SetSystemConfig(SystemConfig);
+            } catch (Exception ex) {
+                /* 
+                 * It's entirely possible that someone has created their own implementation of the IPlugin interface.
+                 * If this is the case, then this plugin will not be able to use the system configs.
+                 * Notify the user.
+                 */
+                log.Warn("Could not set the system configuration for {0}.");
+                log.Warn("Does this plugin use a custom implementation of IPlugin?");
+                log.Warn("Error message: {0}", ex.Message);
+                log.Trace(ex.Source);
+                log.Trace(ex.StackTrace);
+            }
+            pluginInstances.Add(pluginClass);
             var startSuccess = pluginClass.OnStart();
 
             if (startSuccess)
@@ -119,27 +133,26 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="pluginAssembly">Plugin assembly.</param>
         /// <param name="pluginClass">Plugin class.</param>
         public void RegisterPlugin(Assembly pluginAssembly, Type pluginClass) {
-            Debug.WriteLine(string.Format("sLoading plugin {0} ", (object)pluginClass.FullName));
-            if (this.listOfPlugins.ContainsKey(pluginAssembly)) {
-                this.log.Error(string.Format("Plugin {0} could not be loaded: Instance already exists!", (object)pluginClass.FullName));
-                this.log.Error("To load the plugin, stop and then load it again.");
+            Debug.WriteLine(string.Format("Loading plugin {0} ", pluginClass.FullName));
+            if (listOfPlugins.ContainsKey(pluginAssembly)) {
+                log.Error(string.Format("Plugin {0} could not be loaded: Instance already exists!", pluginClass.FullName));
+                log.Error("To load the plugin, stop and then load it again.");
             } else {
-                Plugin pluginClass1 = (Plugin)null;
+                var pluginClass1 = default(IPlugin);
                 try {
-                    pluginClass1 = (Plugin)Activator.CreateInstance(pluginClass);
-                    this.RegisterPlugin(pluginAssembly, pluginClass1);
+                    pluginClass1 = (IPlugin)Activator.CreateInstance(pluginClass);
+                    RegisterPlugin(pluginAssembly, pluginClass1);
                 } catch (TargetInvocationException ex) {
-                    Console.WriteLine("A fatal error occurred!");
-                    this.log.Fatal(string.Format("The plugin {0} could not be loaded! An exception occurred while starting the plugin:", (object)pluginClass1.PluginName));
-                    this.log.Debug(ex.Message);
-                    this.log.Debug(ex.Source);
-                    this.log.Debug(ex.StackTrace);
+                    log.Fatal(string.Format("The plugin {0} could not be loaded! An exception occurred while starting the plugin:", pluginClass1.PluginName));
+                    log.Trace(ex.Message);
+                    log.Trace(ex.Source);
+                    log.Trace(ex.StackTrace);
                 } catch (Exception ex) {
-                    this.log.Fatal(string.Format("A fatal error occurred while loading plugin {0}!", (object)pluginClass1.PluginName));
-                    this.log.Fatal(string.Format("The plugin {0} could not be loaded!", (object)pluginClass1.PluginName));
-                    this.log.Debug(ex.Message);
-                    this.log.Debug(ex.Source);
-                    this.log.Debug(ex.StackTrace);
+                    log.Fatal(string.Format("A fatal error occurred while loading plugin {0}!", pluginClass1.PluginName));
+                    log.Fatal(string.Format("The plugin {0} could not be loaded!", pluginClass1.PluginName));
+                    log.Trace(ex.Message);
+                    log.Trace(ex.Source);
+                    log.Trace(ex.StackTrace);
                 }
             }
         }
@@ -151,7 +164,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="param">Parameter.</param>
         public void CallMethodNoReturn(string assemblyName, string methodName, params object[] @params) {
             var plugin1 = default(IPlugin);
-            foreach (var listOfPlugin in this.ListOfPlugins) {
+            foreach (var listOfPlugin in ListOfPlugins) {
                 if (listOfPlugin.Key.FullName.Equals(assemblyName))
                     plugin1 = (Plugin)listOfPlugin.Key.CreateInstance("Plugin", true);
             }
@@ -169,7 +182,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="param">Parameters.</param>
         public object CallMethod(string assemblyName, string methodName, params object[] param) {
             Plugin plugin = (Plugin)null;
-            foreach (KeyValuePair<Assembly, Type> listOfPlugin in this.ListOfPlugins) {
+            foreach (KeyValuePair<Assembly, Type> listOfPlugin in ListOfPlugins) {
                 if (listOfPlugin.Key.FullName.Equals(assemblyName))
                     plugin = (Plugin)listOfPlugin.Key.CreateInstance("Plugin", true);
             }
@@ -200,8 +213,8 @@ namespace Samarium.PluginFramework.Plugin {
         /// </summary>
         /// <returns>The commands.</returns>
         public IEnumerable<ICommand> GetCommands() {
-            var mainSystemCommands = this.MainSystemCommands;
-            foreach (Plugin pluginInstance in this.pluginInstances)
+            var mainSystemCommands = MainSystemCommands;
+            foreach (Plugin pluginInstance in pluginInstances)
                 mainSystemCommands.AddRange(pluginInstance.PluginCommands.Where(x => x != null));
             return mainSystemCommands;
         }
@@ -213,7 +226,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="searchString">Search string.</param>
         public IEnumerable<string> GetCommands(string searchString = "") {
             List<string> stringList = new List<string>();
-            foreach (var command in this.GetCommands().Where((x => {
+            foreach (var command in GetCommands().Where((x => {
                 if (!string.IsNullOrEmpty(searchString))
                     return x.CommandTag.Contains(searchString);
                 return true;
@@ -229,7 +242,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="searchString">Search string.</param>
         public IEnumerable<Tuple<string, string[], Dictionary<string, string[]>>> GetCommandsWithArgs(string searchString = "") {
             var tupleList = new List<Tuple<string, string[], Dictionary<string, string[]>>>();
-            foreach (var command in this.GetCommands().Where((x => {
+            foreach (var command in GetCommands().Where((x => {
                 if (string.IsNullOrEmpty(searchString))
                     return true;
                 bool flag1 = x.CommandTag.StartsWith(searchString, StringComparison.InvariantCultureIgnoreCase);

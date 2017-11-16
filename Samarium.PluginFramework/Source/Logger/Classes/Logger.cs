@@ -172,8 +172,11 @@ namespace Samarium.PluginFramework.Logger {
 				if (!Directory.Exists(logFilePath))
 					Directory.CreateDirectory(logFilePath);
 
-				LogFile = new FileInfo($"{ value }/{ LoggerName }_{ DateTime.Now.ToFileTime() }.log");
-                LogFile.Create().Close();
+				LogFile = new FileInfo(Path.Combine(value, string.Join(".", LoggerName, "log")));
+                if (!LogFile.Exists)
+                    LogFile.Open(FileMode.CreateNew).Close();
+                else if (SystemConfig?.GetBool("truncate_logs") == true)
+                    LogFile.Open(FileMode.Truncate).Close();
 
 				OnPropertyChanged(nameof(LogFilePath));
 			}
@@ -207,7 +210,7 @@ namespace Samarium.PluginFramework.Logger {
 		/// </summary>
 		/// <value>The print to file.</value>
 		public bool PrintToFile {
-			get { return printToFile; }
+			get => printToFile;
 			set { printToFile = value; OnPropertyChanged(nameof(PrintToFile)); }
 		}
 
@@ -227,10 +230,10 @@ namespace Samarium.PluginFramework.Logger {
 		/// Gets the system config.
 		/// </summary>
 		/// <value>The system config.</value>
-		IConfig SystemConfig { get; set; }
+		static IConfig SystemConfig { get; set; }
 		#endregion
 
-		#region Methods and Functions
+		#region Methods
 		/// <summary>
 		/// Flushes this logger instance's output buffer.
 		/// </summary>

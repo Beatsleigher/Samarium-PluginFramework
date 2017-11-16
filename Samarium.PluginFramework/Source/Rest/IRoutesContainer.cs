@@ -19,6 +19,7 @@ namespace Samarium.PluginFramework.Rest {
     /// Example usage of this interface:
     /// 
     /// <code >
+    /// [ServiceContract(Name = "MyUniqueServiceContractName")]
     /// public class MyPluginRoutes: IRoutesContainer {
     ///     
     ///     [OperationContract]

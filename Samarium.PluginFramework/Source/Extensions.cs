@@ -1,8 +1,11 @@
 ﻿using System;
 
 namespace Samarium.PluginFramework {
+
     using Newtonsoft.Json;
+    using Samarium.PluginFramework.Rest;
     using ServiceStack.Text;
+
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -12,6 +15,7 @@ namespace Samarium.PluginFramework {
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.NamingConventions;
 
@@ -49,6 +53,13 @@ namespace Samarium.PluginFramework {
 
         const string TrueString = "true";
         const string FalseString = "false";
+
+        /// <summary>
+        /// Gets the raw bytes contained in a string.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static byte[] GetBytes(this string str) => Encoding.UTF8.GetBytes(str);
 
         /// <summary>
         /// Splits a string in to command-line-type arguments.
@@ -475,6 +486,138 @@ namespace Samarium.PluginFramework {
                 return YamlNoRegex.Replace(@string, FalseString);
 
             throw new ArgumentException(nameof(@string), "Given string must be a YAML-serialized boolean!");
+        }
+
+        /// <summary>
+        /// Gets the incoming web request.
+        /// </summary>
+        /// <param name="routesContainer"></param>
+        /// <returns></returns>
+        public static IncomingWebRequestContext GetIncomingWebRequest(this IRoutesContainer _) => WebOperationContext.Current.IncomingRequest;
+
+        /// <summary>
+        /// Gets the outgoing web response.
+        /// </summary>
+        /// <param name="routesContainer"></param>
+        /// <returns></returns>
+        public static OutgoingWebResponseContext GetOutgoingWebResponse(this IRoutesContainer _) => WebOperationContext.Current.OutgoingResponse;
+
+        /// <summary>
+        /// Gets a <see cref="Stream"/> of bytes containing HTML code
+        /// </summary>
+        /// <param name="routesContainer"></param>
+        /// <param name="htmlString">The string to convert.</param>
+        /// <returns>A <see cref="MemoryStream"/></returns>
+        public static Stream GetHtmlStream(this IRoutesContainer _, string htmlString) => new MemoryStream(Encoding.UTF8.GetBytes(htmlString));
+
+        /// <summary>
+        /// Gets a <see cref="Stream"/> of bytes containing JSON text.
+        /// </summary>
+        /// <param name="routesContainer"></param>
+        /// <param name="objs">The objects to serialise.</param>
+        /// <returns>A <see cref="MemoryStream"/></returns>
+        public static Stream GetJsonStream(this IRoutesContainer _, params object[] objs) {
+            return new MemoryStream(JsonConvert.SerializeObject(objs).GetBytes());
+        }
+
+        /// <summary>
+        /// Gets a <see cref="Stream"/> of bytes containing pretty (indented) JSON text.
+        /// </summary>
+        /// <param name="routesContainer"></param>
+        /// <param name="objs">The objects to serialise.</param>
+        /// <returns>A <see cref="MemoryStream"/></returns>
+        public static Stream GetPrettyJsonStream(this IRoutesContainer _, params object[] objs) {
+            return new MemoryStream(JsonConvert.SerializeObject(objs, Formatting.Indented).GetBytes());
+        }
+
+        /// <summary>
+        /// Gets a <see cref="Stream"/> of bytes containing YAML text.
+        /// </summary>
+        /// <param name="routesContainer"></param>
+        /// <param name="objs">The objects to serialise.</param>
+        /// <returns>A <see cref="MemoryStream"/></returns>
+        public static Stream GetYamlStream(this IRoutesContainer _, params object[] objs) {
+            var yamlSerializer = new SerializerBuilder().Build();
+            return new MemoryStream(yamlSerializer.Serialize(objs).GetBytes());
+        }
+
+        public static void SetAsNotFound(this OutgoingWebResponseContext context, string description = "", long contentLength = 0, string contentType = "application/x-empty") {
+            context.ContentLength = contentLength;
+            context.ContentType = contentType;
+            context.StatusDescription = description;
+            context.StatusCode = (HttpStatusCode)404;
+        }
+
+        public static void SetAsNoContent(this OutgoingWebResponseContext context, string description = "") {
+            context.ContentLength = 0;
+            context.StatusDescription = description;
+            context.StatusCode = (HttpStatusCode)204;
+        }
+
+        public static void SetAsOk(this OutgoingWebResponseContext context, string description = "", long contentLength = 0, string contentType = "application/x-empty") {
+            context.ContentLength = contentLength;
+            context.ContentType = contentType;
+            context.StatusDescription = description;
+            context.StatusCode = (HttpStatusCode)200;
+        }
+
+        /// <summary>
+        /// Shuffles (randomly organizes) a given list.
+        /// </summary>
+        /// <typeparam name="T">The type contained within the list</typeparam>
+        /// <param name="list"></param>
+        /// <remarks >
+        /// Thanks to StackOverflow user grenade!
+        /// </remarks>
+        public static IList<T> Shuffle<T>(this IList<T> list) {
+            using (var provider = new RNGCryptoServiceProvider()) {
+                var n = list.Count;
+
+                while (n > 1) {
+                    var box = new byte[1];
+                    do
+                        provider.GetBytes(box);
+                    while (!(box[0] < n * (Byte.MaxValue / n)));
+
+                    var k = (box[0] % n);
+                    n--;
+                    T value = list[k];
+                    list[k] = list[n];
+                    list[n] = value;
+                }
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// Generates a new unique ID
+        /// </summary>
+        /// <param name="length">The length of the ID</param>
+        /// <returns>A new, unique identifier.</returns>
+        /// <remarks >
+        /// If a length &lt; 8 is passed, the length will automatically upped to eight.
+        /// Eight is the minimum number of characters.
+        /// </remarks>
+        public static string GenerateUniqueId(int length = 16) {
+
+            const string abc = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-_";
+
+            using (var randomNumberGenerator = new RNGCryptoServiceProvider()) {
+                var sBuilder = new StringBuilder();
+                var buffer = new byte[1];
+
+                for (var i = 0; i < length; i++) {
+                    do
+                        randomNumberGenerator.GetBytes(buffer);
+                    while (buffer[0] > abc.Length);
+
+                    sBuilder.Append(abc[buffer[0]]);
+                }
+
+                return sBuilder.ToString();
+
+            }
+
         }
 
     }

@@ -60,6 +60,15 @@ namespace Samarium.PluginFramework.Config {
         T GetConfig<T>(string key);
 
         /// <summary>
+        /// Attempts to get a config of type <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the config.</typeparam>
+        /// <param name="key">The config's key.</param>
+        /// <param name="cfg">The config itself.</param>
+        /// <returns><code >true</code> if value retrieval was successful. <code >false</code> otherwise.</returns>
+        bool TryGetConfig<T>(string key, out T cfg);
+
+        /// <summary>
         /// Gets a string config.
         /// </summary>
         /// <param name="key">The config's key</param>

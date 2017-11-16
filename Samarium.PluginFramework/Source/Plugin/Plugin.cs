@@ -158,5 +158,17 @@ namespace Samarium.PluginFramework.Plugin {
         protected async Task<ICommandResult> ExecuteCommandAsync(string commandTag, params string[] args) => await PluginRegistry.Instance.ExecuteCommandAsync(this, commandTag, args);
         #endregion
 
+        #region Properties
+        internal IPlugin SetSystemConfig(IConfig cfg) {
+            SystemConfig = cfg;
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the main system's configuration.
+        /// </summary>
+        protected IConfig SystemConfig { get; set; }
+        #endregion
+
     }
 }

@@ -91,6 +91,16 @@ namespace Samarium.PluginFramework.Config {
             throw new InvalidCastException($"Cannot cast { value.GetType().Name } to { typeof(T).Name }!");
         }
 
+        public bool TryGetConfig<T>(string key, out T cfg) {
+            try {
+                cfg = GetConfig<T>(key);
+                return true;
+            } catch {
+                cfg = default;
+                return false;
+            }
+        }
+
         public double GetDouble(string key) => GetConfig<double>(key);
 
         public int GetInt(string key) => GetConfig<int>(key);
@@ -100,6 +110,7 @@ namespace Samarium.PluginFramework.Config {
         public bool HasKey(string key) => cfgHashMap.ContainsKey(key);
 
         public void LoadConfigs() {
+#if USE_YAMLDOTNET
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(new UnderscoredNamingConvention())
                 .Build();
@@ -107,7 +118,11 @@ namespace Samarium.PluginFramework.Config {
             using (var reader = cfgFile.OpenText()) {
                 cfgHashMap = deserializer.Deserialize<Dictionary<string, object>>(reader);
             }
-            return;
+#else
+            cfgHashMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(cfgFile.FullName));
+#endif
+            cfgHashMap["config_dir"] = ConfigDirectory.FullName;
+            ConfigsLoaded?.Invoke(this);
         }
 
         /// <summary>
@@ -115,13 +130,18 @@ namespace Samarium.PluginFramework.Config {
         /// This change is temporary, until they are saved to disk; when they become permanent.
         /// </summary>
         public void LoadDefaults() {
+#if USE_YAMLDOTNET
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(new UnderscoredNamingConvention())
                 .Build();
 
-            using (var reader = defCfgFile.OpenText()) {
+            using (var reader = cfgFile.OpenText()) {
                 cfgHashMap = deserializer.Deserialize<Dictionary<string, object>>(reader);
             }
+#else
+            cfgHashMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(defCfgFile.FullName));
+#endif
+            ConfigsLoaded?.Invoke(this);
         }
 
         public async void SaveConfigs() {
@@ -146,6 +166,7 @@ namespace Samarium.PluginFramework.Config {
 
 
             cfgHashMap.Add(key, value);
+            ConfigSet?.Invoke(this, key);
 
         }
 
