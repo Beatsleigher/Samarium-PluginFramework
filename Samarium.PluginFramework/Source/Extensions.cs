@@ -34,6 +34,8 @@ namespace Samarium.PluginFramework {
 
         static Regex YamlNoRegex { get; }
 
+        static DateTime Epoch { get; }
+
         static Extensions() {
             YamlBoolRegex = new Regex(
                 @"y|Y|yes|Yes|YES|n|N|no|No|NO|true|True|TRUE|false|False|FALSE|on|On|ON|off|Off|OFF",
@@ -49,6 +51,8 @@ namespace Samarium.PluginFramework {
                 @"no|No|NO|n|N",
                 RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.CultureInvariant
             );
+
+            Epoch = new DateTime(1970, 1, 1, 0, 0, 0);
         }
 
         const string TrueString = "true";
@@ -618,6 +622,29 @@ namespace Samarium.PluginFramework {
 
             }
 
+        }
+
+        /// <summary>
+        /// Converts a <see cref="DateTime"/> to a (Unix) timestamp
+        /// </summary>
+        /// <param name="dTime"></param>
+        /// <returns></returns>
+        public static long ToTimeStamp(this DateTime dTime) => (long)(Epoch - dTime).TotalSeconds;
+
+        /// <summary>
+        /// Attempts to determine whether an array of bytes contains binary data,
+        /// rather than string data.
+        /// </summary>
+        /// <param name="bytes">The bytes to check.</param>
+        /// <returns><code >true</code> if the byte array contains binary data.</returns>
+        public static bool HasBinaryContent(this byte[] bytes) {
+            // If any of the bytes is a control char, and is not:
+            // a carriage return char,
+            // a line feed char,
+            // a tab char,
+            // and not a form feed char,
+            // then the bytes are likely of binary nature.
+            return bytes.Any(ch => char.IsControl((char)ch) && ch != '\r' && ch != '\n' && ch != '\t' && ch != '\f');
         }
 
     }

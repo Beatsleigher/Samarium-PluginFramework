@@ -110,6 +110,13 @@ namespace Samarium.PluginFramework.Plugin {
         protected void ToConsole(string format, params object[] args) => Console.WriteLine(format, args);
 
         /// <summary>
+        /// Log a message used for tracing errors to their point of origin.
+        /// </summary>
+        /// <param name="fmt">The format string</param>
+        /// <param name="args">The arguments for the format string</param>
+        protected void Trace(string fmt, params object[] args) => log.Trace(fmt, args);
+
+        /// <summary>
         /// Gets a value indicating whether the inheriting plugin contains
         /// a given command.
         /// </summary>
