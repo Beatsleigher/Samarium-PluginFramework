@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace Samarium.PluginFramework.Common {
+
     using MimeKit;
     using Newtonsoft.Json;
     using Samarium.PluginFramework.Plugin;
@@ -14,7 +15,7 @@ namespace Samarium.PluginFramework.Common {
 
     public class ElasticEmailDocument {
 
-        private static Regex EmailRegex { get; } = new Regex("\\A[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a - z0 - 9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a - z0 - 9])?\\z");
+        private static Regex EmailRegex { get; } = new Regex("\\A[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\z");
 
         /// <summary>
         /// The slash replacement char.
@@ -127,7 +128,7 @@ namespace Samarium.PluginFramework.Common {
             if (iAddr is MailboxAddress mbAddr)
                 return string.Format("{0} <{1}>", mbAddr.Address, mbAddr.Name);
             else if (iAddr is GroupAddress grAddr)
-                return string.Format("{0} <Group: {1}>", string.Join("; ", grAddr.Members.Select(InternetAddressSelector)), grAddr.Name; // WOHOO! RECURSION!
+                return string.Format("{0} <Group: {1}>", string.Join("; ", grAddr.Members.Select(InternetAddressSelector)), grAddr.Name); // WOHOO! RECURSION!
             return default;
         }
 

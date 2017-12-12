@@ -3,7 +3,7 @@
 namespace Samarium.PluginFramework.Config {
 
     using Newtonsoft.Json;
-
+    using Newtonsoft.Json.Linq;
     using ServiceStack.Text;
 
     using System.Collections.Generic;
@@ -58,6 +58,7 @@ namespace Samarium.PluginFramework.Config {
         }
 
         void Init(string defConfig) {
+            ConfigDirectory.Create();
             if (!cfgFile.Exists) {
                 File.WriteAllText(cfgFile.FullName, defConfig);
             }
@@ -88,7 +89,11 @@ namespace Samarium.PluginFramework.Config {
                     return (T)Convert.ChangeType(@bool, typeof(T));
             }
 
-            throw new InvalidCastException($"Cannot cast { value.GetType().Name } to { typeof(T).Name }!");
+            try {
+                return ((JObject)value).ToObject<T>();
+            } catch (InvalidCastException) {
+                throw new InvalidCastException($"Cannot cast { value.GetType().Name } to { typeof(T).Name }!");
+            }
         }
 
         public bool TryGetConfig<T>(string key, out T cfg) {

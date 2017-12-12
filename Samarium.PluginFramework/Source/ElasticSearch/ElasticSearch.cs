@@ -5,7 +5,7 @@ namespace Samarium.PluginFramework.ElasticSearch {
     using Elasticsearch.Net;
 
     using Nest;
-
+    using Samarium.PluginFramework.Config;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
@@ -53,7 +53,13 @@ namespace Samarium.PluginFramework.ElasticSearch {
             if (esConfig.UseProxy)
                 conSettings.Proxy(esConfig.ProxyAddress, esConfig.ProxyUsername, esConfig.ProxyPassword);
 
-            var client = new ElasticClient();
+            Client = new ElasticClient(conSettings);
+        }
+        
+        public static ElasticClient Client { get; private set; }
+
+        public static void UpdateEsConfig(IConfig sender, string key) {
+            Configure(sender.GetConfig<EsConfig>(key)); 
         }
 
     }
