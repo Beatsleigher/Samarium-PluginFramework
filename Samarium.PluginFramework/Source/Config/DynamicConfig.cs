@@ -39,6 +39,7 @@ namespace Samarium.PluginFramework.Config {
         public DirectoryInfo ConfigDirectory { get; }
 
         Dictionary<string, object> cfgHashMap;
+        Dictionary<string, object> defCfgHashMap;
         FileInfo cfgFile;
         FileInfo defCfgFile;
 
@@ -61,8 +62,11 @@ namespace Samarium.PluginFramework.Config {
             ConfigDirectory.Create();
             if (!cfgFile.Exists) {
                 File.WriteAllText(cfgFile.FullName, defConfig);
+            } if (!defCfgFile.Exists || defCfgFile.Length < defConfig.Length) {
+                File.WriteAllText(defCfgFile.FullName, defConfig);
             }
             LoadConfigs();
+            LoadDefaults(defConfig);
         }
 
         #region Properties
@@ -77,6 +81,34 @@ namespace Samarium.PluginFramework.Config {
 
         public bool GetBool(string key) => GetConfig<bool>(key);
 
+        public bool TryGetDefault<T>(string key, out T cfg) {
+            var hasKey = cfgHashMap.TryGetValue(key, out var value);
+
+            if (hasKey && value is T tVal) {
+                cfg = tVal;
+                return true;
+            } else if (hasKey && (typeof(T) == typeof(bool) && value is string str)) {
+                // Ugly hack to work around YamlDotNet's shortcomings :/
+                str = str.ConvertYamlBool();
+                if (bool.TryParse(str, out var @bool)) {
+                    cfg = (T)Convert.ChangeType(@bool, typeof(T));
+                    return true;
+                }
+            } else if (!hasKey) {
+                cfg = default;
+                return false;
+            }
+
+            // Brute-force attempt
+            try {
+                cfg = ((JObject)value).ToObject<T>();
+                return true;
+            } catch (InvalidCastException) {
+                cfg = default;
+                return false;
+            }
+        }
+
         public T GetConfig<T>(string key) {
             var hasKey = cfgHashMap.TryGetValue(key, out var value);
 
@@ -87,6 +119,10 @@ namespace Samarium.PluginFramework.Config {
                 str = str.ConvertYamlBool();
                 if (bool.TryParse(str, out var @bool))
                     return (T)Convert.ChangeType(@bool, typeof(T));
+            } else if (!hasKey) {
+                if (TryGetDefault(key, out T cfg)) {
+                    return cfg;
+                } else throw new KeyNotFoundException(string.Format("The key \"{0}\" could not be found!", key));
             }
 
             try {
@@ -145,6 +181,19 @@ namespace Samarium.PluginFramework.Config {
             }
 #else
             cfgHashMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(defCfgFile.FullName));
+#endif
+            ConfigsLoaded?.Invoke(this);
+        }
+
+        void LoadDefaults(string defaults, bool overwrite = false) {
+#if USE_YAMLDOTNET
+            defCfgHashMap = deserializer.Deserialize<Dictionary<string, object>>(defaults);
+            if (overwrite)
+                cfgHashMap = defCfgHashMap;
+#else
+            cfgHashMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(defaults);
+            if (overwrite)
+                cfgHashMap = defCfgHashMap;
 #endif
             ConfigsLoaded?.Invoke(this);
         }
