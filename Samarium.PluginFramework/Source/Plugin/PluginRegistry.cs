@@ -272,5 +272,14 @@ namespace Samarium.PluginFramework.Plugin {
 
             return cmdList;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether a specific plugin has been loaded in to
+        /// memory or not.
+        /// </summary>
+        /// <param name="pluginName">The plugin name to check against.</param>
+        /// <returns><code>true</code> if the plugin was found. <code>false</code> otherwise.</returns>
+        public bool HasPlugin(string pluginName) => PluginInstances.Count(x => x.PluginName.ToLowerInvariant() == pluginName.ToLowerInvariant()) == 1;
+
     }
 }
