@@ -281,5 +281,12 @@ namespace Samarium.PluginFramework.Plugin {
         /// <returns><code>true</code> if the plugin was found. <code>false</code> otherwise.</returns>
         public bool HasPlugin(string pluginName) => PluginInstances.Count(x => x.PluginName.ToLowerInvariant() == pluginName.ToLowerInvariant()) == 1;
 
+        /// <summary>
+        /// Attempts to get a plugin instance via the name of the plugin.
+        /// </summary>
+        /// <param name="pluginName">The plugin name to check against.</param>
+        /// <returns></returns>
+        public IPlugin GetPlugin(string pluginName) => PluginInstances.FirstOrDefault(x => x.PluginName.ToLowerInvariant() == pluginName.ToLowerInvariant());
+
     }
 }

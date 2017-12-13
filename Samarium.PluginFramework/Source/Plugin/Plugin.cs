@@ -175,6 +175,22 @@ namespace Samarium.PluginFramework.Plugin {
         /// Gets the main system's configuration.
         /// </summary>
         protected IConfig SystemConfig { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this plugin will log to the console or not.
+        /// </summary>
+        public bool LogToConsole {
+            get => log.PrintToConsole;
+            set => log.PrintToConsole = value;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this plugin will log to its respective log file or not.
+        /// </summary>
+        public bool LogToFile {
+            get => log.PrintToFile;
+            set => log.PrintToFile = value;
+        }
         #endregion
 
     }

@@ -81,5 +81,15 @@ namespace Samarium.PluginFramework.Plugin {
         /// <returns>The command.</returns>
         ICommand GetCommand(string commandTag);
 
+        /// <summary>
+        /// Gets or sets a value indicating whether a plugin will log to the console or not.
+        /// </summary>
+        bool LogToConsole { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a plugin will log to its respective log file or not.
+        /// </summary>
+        bool LogToFile { get; set; }
+
     }
 }
