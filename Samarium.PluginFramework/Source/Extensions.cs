@@ -581,11 +581,11 @@ namespace Samarium.PluginFramework {
                     var box = new byte[1];
                     do
                         provider.GetBytes(box);
-                    while (!(box[0] < n * (Byte.MaxValue / n)));
+                    while (!(box[0] < n * (byte.MaxValue / n)));
 
                     var k = (box[0] % n);
                     n--;
-                    T value = list[k];
+                    var value = list[k];
                     list[k] = list[n];
                     list[n] = value;
                 }
@@ -646,6 +646,29 @@ namespace Samarium.PluginFramework {
             // then the bytes are likely of binary nature.
             return bytes.Any(ch => char.IsControl((char)ch) && ch != '\r' && ch != '\n' && ch != '\t' && ch != '\f');
         }
+
+        /// <summary>
+        /// Determines whether a directory is empty or not.
+        /// </summary>
+        /// <param name="dir">The directory to check against.</param>
+        /// <returns><code>true</code>if the directory and its subdirectories are empty.</returns>
+        public static bool IsEmpty(this DirectoryInfo dir) {
+            var returnVal = dir.GetFiles().Length > 0;
+
+            foreach (var subDir in dir.GetDirectories()) {
+                returnVal &= subDir.IsEmpty();
+            }
+
+            return returnVal;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether a given directory (top directory only) contains a given pattern or not.
+        /// </summary>
+        /// <param name="dir">The directory in which to check.</param>
+        /// <param name="pattern">The pattern to check against.</param>
+        /// <returns><code >true</code> if the directory contains a filesystem entry matching the pattern.</returns>
+        public static bool Contains(this DirectoryInfo dir, string pattern) => dir.GetFileSystemInfos(pattern, SearchOption.TopDirectoryOnly).Count() > 0;
 
     }
 }
