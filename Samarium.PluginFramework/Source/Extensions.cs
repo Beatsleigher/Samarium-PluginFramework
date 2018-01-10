@@ -574,6 +574,8 @@ namespace Samarium.PluginFramework {
         /// Thanks to StackOverflow user grenade!
         /// </remarks>
         public static IList<T> Shuffle<T>(this IList<T> list) {
+            if (list.Count == 0)
+                return list;
             using (var provider = new RNGCryptoServiceProvider()) {
                 var n = list.Count;
 
@@ -669,6 +671,36 @@ namespace Samarium.PluginFramework {
         /// <param name="pattern">The pattern to check against.</param>
         /// <returns><code >true</code> if the directory contains a filesystem entry matching the pattern.</returns>
         public static bool Contains(this DirectoryInfo dir, string pattern) => dir.GetFileSystemInfos(pattern, SearchOption.TopDirectoryOnly).Count() > 0;
+
+        /// <summary>
+        /// Gets the percentage of a total.
+        /// </summary>
+        /// <param name="total">The total.</param>
+        /// <param name="curAmount">The current amount.</param>
+        /// <example >
+        /// To get the percentage from 1/100 => GetPercentage(total: 100, curAmount: 1);
+        /// </example>
+        /// <returns></returns>
+        public static double GetPercentage(double total, double curAmount) => curAmount / total * 100;
+
+        /// <summary>
+        /// Gets the index of an element in an enumerable object according to parameters set in the predicate function.
+        /// </summary>
+        /// <remarks >
+        /// If the element was not found, -1 will be returned.
+        /// </remarks>
+        /// <typeparam name="T">The type contained within the enumerable.</typeparam>
+        /// <param name="enumerable">The enumerable.</param>
+        /// <param name="predicate">The predicate.</param>
+        /// <returns>-1 if an element matching the predicate was not found, or the index of the element matching the predicate.</returns>
+        public static int IndexOf<T>(this IEnumerable<T> enumerable, Predicate<T> predicate) {
+            for (var i = 0; i < enumerable.Count(); i++) {
+                if (predicate(enumerable.ElementAt(i)))
+                    return i;
+            }
+
+            return -1;
+        }
 
     }
 }

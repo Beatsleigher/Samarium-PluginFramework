@@ -22,6 +22,11 @@ namespace Samarium.PluginFramework.ElasticSearch {
                     conPool = new SingleNodeConnectionPool(esConfig.KnownNodes?.FirstOrDefault());
                     break;
                 case EsConnectionType.SniffingPool:
+                    if (esConfig.KnownNodes.Distinct().ToList().Count == 1) {
+                        // Because buggy
+                        conPool = new SingleNodeConnectionPool(esConfig.KnownNodes?.FirstOrDefault());
+                        break;
+                    }
                     conPool = new SniffingConnectionPool(esConfig.KnownNodes, esConfig.RandomizeNodes);
                     break;
                 case EsConnectionType.StaticPool:

@@ -18,9 +18,9 @@ namespace Samarium.PluginFramework.Config {
 
         public bool IsDynamic => false;
 
-        public int ConfigCount => configContainer.GetType().GetProperties().Count(IsConfigMember);
+        public int ConfigCount => (int)configContainer?.GetType().GetProperties().Count(IsConfigMember);
 
-        public List<string> Keys => configContainer.GetType().GetProperties().OfType<ConfigMemberAttribute>().Select(x => x.Name).ToList();
+        public List<string> Keys => configContainer?.GetType().GetProperties().OfType<ConfigMemberAttribute>().Select(x => x.Name).ToList();
 
         public abstract string Name { get; }
 

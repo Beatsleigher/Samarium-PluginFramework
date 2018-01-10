@@ -191,7 +191,7 @@ namespace Samarium.PluginFramework.Config {
             if (overwrite)
                 cfgHashMap = defCfgHashMap;
 #else
-            cfgHashMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(defaults);
+            defCfgHashMap = JsonConvert.DeserializeObject<Dictionary<string, object>>(defaults);
             if (overwrite)
                 cfgHashMap = defCfgHashMap;
 #endif
