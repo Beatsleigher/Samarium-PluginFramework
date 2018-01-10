@@ -9,13 +9,13 @@ namespace Samarium.PluginFramework.Common {
 
     public class ElasticEmailAttachmentDocument {
 
-        string MimeType { get; set; }
+        public string MimeType { get; set; }
 
-        IEnumerable<string> MetaData { get; set; }
+        public IDictionary<string, string> Metadata { get; set; }
 
-        string FileName { get; set; }
+        public string FileName { get; set; }
 
-        string StringContent { get; set; }
+        public string StringContent { get; set; }
 
     }
 

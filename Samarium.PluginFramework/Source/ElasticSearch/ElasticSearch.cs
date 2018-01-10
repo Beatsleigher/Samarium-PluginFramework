@@ -11,8 +11,22 @@ namespace Samarium.PluginFramework.ElasticSearch {
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Static helper class for generating a single, application-wide <see cref="ElasticClient"/>.
+    /// </summary>
     public static class ElasticSearch {
 
+        public static event EventHandler ClientReconfigured;
+
+        /// <summary>
+        /// Gets the pre-configured client.
+        /// </summary>
+        public static ElasticClient Client { get; private set; }
+
+        /// <summary>
+        /// Configures the client.
+        /// </summary>
+        /// <param name="esConfig"></param>
         public static void Configure(EsConfig esConfig) {
             var conPool = default(IConnectionPool);
 
@@ -59,6 +73,7 @@ namespace Samarium.PluginFramework.ElasticSearch {
                 conSettings.Proxy(esConfig.ProxyAddress, esConfig.ProxyUsername, esConfig.ProxyPassword);
 
             Client = new ElasticClient(conSettings);
+            ClientReconfigured?.Invoke(Client, default);
         }
         
         public static ElasticClient Client { get; private set; }
