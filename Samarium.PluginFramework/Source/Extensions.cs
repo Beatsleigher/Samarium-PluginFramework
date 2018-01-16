@@ -16,6 +16,8 @@ namespace Samarium.PluginFramework {
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
+    using TikaOnDotNet.TextExtraction;
+
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.NamingConventions;
 
@@ -596,6 +598,16 @@ namespace Samarium.PluginFramework {
         }
 
         /// <summary>
+        /// Shuffles (randomly organizes) a given list asynchronously.
+        /// </summary>
+        /// <typeparam name="T">The type contained within the list</typeparam>
+        /// <param name="list"></param>
+        /// <remarks >
+        /// Thanks to StackOverflow user grenade!
+        /// </remarks>
+        public static async Task<IList<T>> ShuffleAsync<T>(this IList<T> list) => await Task.Run(() => Shuffle(list));
+
+        /// <summary>
         /// Generates a new unique ID
         /// </summary>
         /// <param name="length">The length of the ID</param>
@@ -681,7 +693,7 @@ namespace Samarium.PluginFramework {
         /// To get the percentage from 1/100 => GetPercentage(total: 100, curAmount: 1);
         /// </example>
         /// <returns></returns>
-        public static double GetPercentage(double total, double curAmount) => curAmount / total * 100;
+        public static double GetPercentage(double total, double curAmount) => Math.Round(curAmount / total * 100, 2);
 
         /// <summary>
         /// Gets the index of an element in an enumerable object according to parameters set in the predicate function.
@@ -700,6 +712,16 @@ namespace Samarium.PluginFramework {
             }
 
             return -1;
+        }
+
+        /// <summary>
+        /// Extracts data from a file asynchronously.
+        /// </summary>
+        /// <param name="extractor">The extractor.</param>
+        /// <param name="rawData">The raw data.</param>
+        /// <returns></returns>
+        public static async Task<TextExtractionResult> ExtractAsync(this TextExtractor extractor, byte[] rawData) {
+            return await Task.Run(() => extractor.Extract(rawData));
         }
 
     }

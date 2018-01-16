@@ -76,8 +76,6 @@ namespace Samarium.PluginFramework.ElasticSearch {
             ClientReconfigured?.Invoke(Client, default);
         }
         
-        public static ElasticClient Client { get; private set; }
-
         public static void UpdateEsConfig(IConfig sender, string key) {
             Configure(sender.GetConfig<EsConfig>(key)); 
         }
