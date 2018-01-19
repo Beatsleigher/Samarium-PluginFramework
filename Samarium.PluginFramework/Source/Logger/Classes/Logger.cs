@@ -320,29 +320,34 @@ namespace Samarium.PluginFramework.Logger {
                             Console.WriteLine();
                     }
                 } else {
-                    if (PrintToConsole) {
+                    if (PrintToConsole || level == LogLevel.None) {
                         Console.Write(output01);
-                        Console.Write(" [");
-                        switch (level) {
-                            case LogLevel.Debug:
-                                Console.ForegroundColor = COLOR_DEBUG;
-                                break;
-                            case LogLevel.Info:
-                                Console.ForegroundColor = COLOR_INFO;
-                                break;
-                            case LogLevel.Trace:
-                                Console.ForegroundColor = COLOR_TRACE;
-                                break;
-                            case LogLevel.Warn:
-                                Console.ForegroundColor = COLOR_WARN;
-                                break;
-                            case LogLevel.OK:
-                                Console.ForegroundColor = COLOR_OK;
-                                break;
-                        }
-                        Console.Write(output02);
-                        Console.ForegroundColor = DEF_FOREGROUND;
-                        Console.Write("] ");
+                        if (level != LogLevel.None) {
+                            Console.Write(" [");
+                            switch (level) {
+                                case LogLevel.Debug:
+                                    Console.ForegroundColor = COLOR_DEBUG;
+                                    break;
+                                case LogLevel.Info:
+                                    Console.ForegroundColor = COLOR_INFO;
+                                    break;
+                                case LogLevel.Trace:
+                                    Console.ForegroundColor = COLOR_TRACE;
+                                    break;
+                                case LogLevel.Warn:
+                                    Console.ForegroundColor = COLOR_WARN;
+                                    break;
+                                case LogLevel.OK:
+                                    Console.ForegroundColor = COLOR_OK;
+                                    break;
+                                case LogLevel.None:
+                                    Console.ForegroundColor = DEF_FOREGROUND;
+                                    break;
+                            }
+                            Console.Write(output02);
+                            Console.ForegroundColor = DEF_FOREGROUND;
+                            Console.Write("] ");
+                        } else Console.Write(' ');
                         if (level == LogLevel.Debug)
                             Console.ForegroundColor = COLOR_DEBUG;
                         Console.Write(output03);
@@ -353,7 +358,7 @@ namespace Samarium.PluginFramework.Logger {
                     }
                 }
 
-				if (PrintToFile) {
+				if (PrintToFile && level != LogLevel.None) {
                     var sWriter = default(StreamWriter);
 
                     // Determine whether log file is viable for deletion or not
@@ -434,6 +439,8 @@ namespace Samarium.PluginFramework.Logger {
         public void Ok(string msg, bool newLine = true) => Log(LogLevel.OK, msg, newLine);
 
         public void Ok(string format, params object[] args) => Ok(string.Format(format, args));
+
+        public void Output(string format, params object[] args) => Log(LogLevel.None, string.Format(format, args));
 
         /// <summary>
         /// Sets the config object for this instance.

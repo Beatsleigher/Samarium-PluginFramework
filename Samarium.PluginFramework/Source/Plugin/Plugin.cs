@@ -107,7 +107,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// </summary>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        protected void ToConsole(string format, params object[] args) => Console.WriteLine(format, args);
+        protected void ToConsole(string format, params object[] args) => log.Output(format, args);
 
         /// <summary>
         /// Log a message used for tracing errors to their point of origin.

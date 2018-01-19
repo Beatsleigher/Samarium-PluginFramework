@@ -39,9 +39,14 @@ namespace Samarium.PluginFramework.Logger {
         /// <summary>
         /// Log level.
         /// </summary>
-        OK
+        OK,
 
-	}
+        /// <summary>
+        /// Log level.
+        /// </summary>
+        None
+
+    }
 
 }
 

@@ -7,6 +7,7 @@ namespace Samarium.PluginFramework {
     using ServiceStack.Text;
 
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -14,6 +15,7 @@ namespace Samarium.PluginFramework {
     using System.ServiceModel.Web;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using TikaOnDotNet.TextExtraction;
@@ -29,7 +31,7 @@ namespace Samarium.PluginFramework {
 
         // This constant determines the number of iterations for the password bytes generation function.
         private const int DerivationIterations = 1000;
-        
+
         static Regex YamlBoolRegex { get; }
 
         static Regex YamlYesRegex { get; }
@@ -317,7 +319,7 @@ namespace Samarium.PluginFramework {
             }
             return randomBytes;
         }
-        
+
         /// <summary>
         /// Parses a string from a human-readable timespan (e.g.: 10m, 30s, 5hr) to a <see cref="TimeSpan"/> object
         /// </summary>
@@ -428,7 +430,7 @@ namespace Samarium.PluginFramework {
             tList.AddRange(elems);
             return tList.ToArray();
         }
-        
+
         /// <summary>
         /// Sets the status of an <see cref="OutgoingWebResponseContext"/> to HTTP 400/Bad Request.
         /// </summary>
@@ -617,21 +619,31 @@ namespace Samarium.PluginFramework {
         /// Eight is the minimum number of characters.
         /// </remarks>
         public static string GenerateUniqueId(int length = 16) {
-
-            const string abc = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-_";
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            const string abc = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-";
 
             using (var randomNumberGenerator = new RNGCryptoServiceProvider()) {
                 var sBuilder = new StringBuilder();
                 var buffer = new byte[1];
 
-                for (var i = 0; i < length; i++) {
-                    do
-                        randomNumberGenerator.GetBytes(buffer);
-                    while (buffer[0] > abc.Length);
+                try {
+                    for (var i = 0; i < length; i++) {
+                        do
+                            randomNumberGenerator.GetBytes(buffer);
+                        while (buffer[0] > abc.Length);
 
-                    sBuilder.Append(abc[buffer[0]]);
+                        sBuilder.Append(abc[buffer[0]]);
+                    }
+                } catch (Exception ex) {
+                    Debug.WriteLine("[Samarium] Caught exception generating random string: {0}", ex.Message);
+                    Debug.WriteLine("[Samarium]Stack trace: {0}", ex.StackTrace);
+                    Debug.WriteLine("[Samarium] Attempting to re-call method!");
+                    return GenerateUniqueId(length);
                 }
 
+                stopWatch.Stop();
+                Debug.WriteLine("Random string generation (length: {0}) took {1}.", length, stopWatch.Elapsed);
                 return sBuilder.ToString();
 
             }
@@ -723,6 +735,8 @@ namespace Samarium.PluginFramework {
         public static async Task<TextExtractionResult> ExtractAsync(this TextExtractor extractor, byte[] rawData) {
             return await Task.Run(() => extractor.Extract(rawData));
         }
+
+        public static string ToElasticIndexName(this string @string) => @string.ToLowerInvariant().Replace(' ', '_');
 
     }
 }

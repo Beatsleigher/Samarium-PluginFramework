@@ -15,33 +15,28 @@ namespace Samarium.PluginFramework.ElasticSearch {
         /// <summary>
         /// Gets or sets the file's (text) content
         /// </summary>
-        [Keyword]
         public string Content { get; set; }
 
         /// <summary>
         /// Gets or sets the file's content type
         /// </summary>
-        [Keyword]
         public string ContentType { get; set; }
 
         /// <summary>
         /// Gets or sets the file's name.
         /// </summary>
-        [Keyword]
         public string FileName { get; set; }
 
         /// <summary>
         /// Gets or sets the file's size in bytes.
         /// </summary>
-        [Number(NumberType.Long, IgnoreMalformed = true, Coerce = true)]
         public long FileSize { get; set; }
 
         /// <summary>
         /// Gets or sets the file's metadata.
         /// </summary>
-
-        [Nested][Object]
-        public Dictionary<string, string> Metadata { get; set; }
+        //public Dictionary<string, string> Metadata { get; set; }
+        public string Metadata { get; set; }
 
     }
 }

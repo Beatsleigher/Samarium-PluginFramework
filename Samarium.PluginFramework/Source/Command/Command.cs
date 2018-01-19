@@ -12,6 +12,14 @@ namespace Samarium.PluginFramework.Command {
     public class Command : ICommand {
 
         public static ICommand GetExecutableCommand(string commandTag, params string[] args) => new Command(commandTag, args);
+
+        /// <summary>
+        /// Gets or sets the help command.
+        /// </summary>
+        /// <value>
+        /// The help command.
+        /// </value>
+        public static ICommand HelpCommand { get; set; }
         
         Command(string tag, params string[] args) {
             CommandTag = tag;
@@ -88,6 +96,14 @@ namespace Samarium.PluginFramework.Command {
         /// <param name="switch">The string to check against.</param>
         /// <returns><code >true</code> if the passed string is a valid switch.</returns>
         public bool IsSwitch(string @switch) => Switches.ContainsKey(@switch);
+
+        /// <summary>
+        /// Calls the help command for this given command.
+        /// </summary>
+        /// <returns>
+        /// The output of the help command.
+        /// </returns>
+        public ICommandResult GetHelp() => HelpCommand.Execute(CommandTag);
 
         /// <summary>
 		/// Sorts the arguments.

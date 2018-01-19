@@ -77,6 +77,12 @@ namespace Samarium.PluginFramework.Command {
 		/// <param name="switches">Switches.</param>
 		/// <param name="cmdArgs">Cmd arguments.</param>
 		void SortArgs(out IEnumerable<string> parameters, out IEnumerable<string> arguments, out Dictionary<string, string> switches, IEnumerable<string> cmdArgs);
+
+        /// <summary>
+        /// Cals the help command for this given command.
+        /// </summary>
+        /// <returns>The output of the help command.</returns>
+        ICommandResult GetHelp();
         #endregion
 
         #region Properties

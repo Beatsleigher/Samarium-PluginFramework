@@ -190,6 +190,7 @@
     <Compile Include="Source\incslock.cs" />
     <Compile Include="Source\Logger\Classes\Logger.cs" />
     <Compile Include="Source\Logger\Enum\LogLevel.cs" />
+    <Compile Include="Source\ModifiedDotNet\StringReader.cs" />
     <Compile Include="Source\Plugin\IPlugin.cs" />
     <Compile Include="Source\Plugin\Plugin.cs" />
     <Compile Include="Source\Plugin\PluginRegistry.cs" />
