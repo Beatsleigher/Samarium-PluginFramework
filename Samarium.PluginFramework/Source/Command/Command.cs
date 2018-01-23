@@ -95,7 +95,7 @@ namespace Samarium.PluginFramework.Command {
         /// </summary>
         /// <param name="switch">The string to check against.</param>
         /// <returns><code >true</code> if the passed string is a valid switch.</returns>
-        public bool IsSwitch(string @switch) => Switches.ContainsKey(@switch);
+        public bool IsSwitch(string @switch) => Switches.ContainsKey(@switch); // Hack, I guess
 
         /// <summary>
         /// Calls the help command for this given command.
@@ -118,9 +118,9 @@ namespace Samarium.PluginFramework.Command {
             var _switches = new Dictionary<string, string>();
 
             foreach (var arg in cmdArgs) {
-                if (IsArgument(arg) == true) {
+                if (IsArgument(arg)) {
                     _arguments.Add(arg);
-                } else if (IsSwitch(arg) == true) {
+                } else if (IsSwitch(arg.Split(new[] { '=' }, 2)[0] + "=")) {
                     var split = arg.Split(new[] { '=' }, 2); // Split at the = character; return max 2 substrings
                     _switches.Add(split[0], split[1]);
                 } else {

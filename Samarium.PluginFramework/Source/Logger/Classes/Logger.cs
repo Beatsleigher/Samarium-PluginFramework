@@ -442,6 +442,8 @@ namespace Samarium.PluginFramework.Logger {
 
         public void Output(string format, params object[] args) => Log(LogLevel.None, string.Format(format, args));
 
+        public void Output(string msg) => Log(LogLevel.None, msg);
+
         /// <summary>
         /// Sets the config object for this instance.
         /// If the config has already been set, the new instance will be ignored to prevent catastrophic failure.

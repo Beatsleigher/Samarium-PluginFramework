@@ -42,6 +42,14 @@ namespace Samarium.PluginFramework.Threading {
         public dynamic ThreadData { get; set; }
 
         /// <summary>
+        /// Gets or sets the worker.
+        /// </summary>
+        /// <value>
+        /// The worker.
+        /// </value>
+        public Thread Worker { get; set; }
+
+        /// <summary>
         /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
         /// </summary>
         /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>

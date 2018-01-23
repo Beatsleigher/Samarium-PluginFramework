@@ -108,6 +108,13 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="format"></param>
         /// <param name="args"></param>
         protected void ToConsole(string format, params object[] args) => log.Output(format, args);
+        
+        /// <summary>
+        /// Essentially a shortcut to <see cref="Console.WriteLine"/>
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="args"></param>
+        protected void ToConsole(string msg) => log.Output(msg);
 
         /// <summary>
         /// Log a message used for tracing errors to their point of origin.
