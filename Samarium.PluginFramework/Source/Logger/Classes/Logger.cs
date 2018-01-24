@@ -364,7 +364,9 @@ namespace Samarium.PluginFramework.Logger {
                     // Determine whether log file is viable for deletion or not
                     if (LogFile.CreationTime <= DateTime.Now.AddDays(-7) || LogFile.Length >= 1073741824L) {
                         LogFile.CreationTime = DateTime.Now;
+#pragma warning disable CS0642
                         using (LogFile.Open(FileMode.Truncate)) ;
+#pragma warning restore CS0642
                     }
 
                     sWriter = LogFile.AppendText();

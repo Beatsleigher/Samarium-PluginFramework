@@ -736,7 +736,37 @@ namespace Samarium.PluginFramework {
             return await Task.Run(() => extractor.Extract(rawData));
         }
 
+        /// <summary>
+        /// Converts a string so it is viable to be an index name within Elasticsearch.
+        /// </summary>
+        /// <param name="string"></param>
+        /// <returns></returns>
         public static string ToElasticIndexName(this string @string) => @string.ToLowerInvariant().Replace(' ', '_');
+        
+        public static async Task<IEnumerable<FileSystemInfo>> EnumerateFileSystemInfosAsync(this DirectoryInfo dInfo, string pattern, SearchOption searchOption)
+            => await Task.Run(() => dInfo.EnumerateFileSystemInfos(pattern, searchOption));
+
+        /// <summary>
+        /// Recursively copies one directory to a new location.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        public static void CopyAll(this DirectoryInfo source, DirectoryInfo target) {
+            Directory.CreateDirectory(target.FullName);
+
+            // Copy each file into the new directory.
+            foreach (FileInfo fi in source.GetFiles()) {
+                Debug.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
+                fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+            }
+
+            // Copy each subdirectory using recursion.
+            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories()) {
+                DirectoryInfo nextTargetSubDir =
+                    target.CreateSubdirectory(diSourceSubDir.Name);
+                CopyAll(diSourceSubDir, nextTargetSubDir);
+            }
+        }
 
     }
 }
