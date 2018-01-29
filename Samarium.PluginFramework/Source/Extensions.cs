@@ -743,6 +743,13 @@ namespace Samarium.PluginFramework {
         /// <returns></returns>
         public static string ToElasticIndexName(this string @string) => @string.ToLowerInvariant().Replace(' ', '_');
         
+        /// <summary>
+        /// Asynchronously enumerates filesystem information objects in a directory.
+        /// </summary>
+        /// <param name="dInfo"></param>
+        /// <param name="pattern"></param>
+        /// <param name="searchOption"></param>
+        /// <returns></returns>
         public static async Task<IEnumerable<FileSystemInfo>> EnumerateFileSystemInfosAsync(this DirectoryInfo dInfo, string pattern, SearchOption searchOption)
             => await Task.Run(() => dInfo.EnumerateFileSystemInfos(pattern, searchOption));
 
@@ -755,7 +762,7 @@ namespace Samarium.PluginFramework {
             Directory.CreateDirectory(target.FullName);
 
             // Copy each file into the new directory.
-            foreach (FileInfo fi in source.GetFiles()) {
+            foreach (var fi in source.GetFiles()) {
                 Debug.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
                 fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
             }
@@ -766,6 +773,37 @@ namespace Samarium.PluginFramework {
                     target.CreateSubdirectory(diSourceSubDir.Name);
                 CopyAll(diSourceSubDir, nextTargetSubDir);
             }
+        }
+
+        /// <summary>
+        /// Recursively copies one directory to a new location asynchronously.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        public static async Task CopyAllAsync(this DirectoryInfo source, DirectoryInfo target) => await Task.Run(() => CopyAll(source, target));
+
+        /// <summary>
+        /// Digests a given file and returns the result as an array of bytes.
+        /// </summary>
+        /// <remarks >
+        /// Digestion is performed using the SHA256 algorithm.
+        /// </remarks>
+        /// <param name="fInfo"></param>
+        /// <returns>An array of bytes containing a digested file.</returns>
+        public static byte[] Digest(this FileInfo fInfo) => File.ReadAllBytes(fInfo.FullName).Digest();
+
+        /// <summary>
+        /// Digests a given array of bytes and returns another array of bytes containing the digested data.
+        /// </summary>
+        /// <remarks>
+        /// Digestion is performe using the SHA256 algorithm.
+        /// </remarks>
+        /// <param name="bytes">The data to digest.</param>
+        /// <returns>An array of bytes containing the digested data.</returns>
+        public static byte[] Digest(this byte[] bytes) {
+            var sha = new SHA256Managed();
+            var computedDigest = sha.ComputeHash(bytes);
+            return computedDigest;
         }
 
     }
