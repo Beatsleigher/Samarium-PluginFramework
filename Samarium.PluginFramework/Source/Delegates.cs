@@ -47,4 +47,14 @@ namespace Samarium.PluginFramework {
     /// <param name="sender">The calling <see cref="IConfig"/> object.</param>
     public delegate void ConfigsLoadedEventHandler(IConfig sender);
 
+    /// <summary>
+    /// Delegate void used to retrieve configurations system-wide.
+    /// This method should be avoided when requesting plugin-specific configurations, that 
+    /// can be easily accessed via the PluginConfigs property!
+    /// </summary>
+    /// <param name="configKey">The config's key</param>
+    /// <param name="pluginName" >(Optional): Specifically target a single plugin's configuration.</param>
+    /// <returns>The value of the config or the default value.</returns>
+    internal delegate object GetSystemWideConfigEventHandler(string configKey, string pluginName = default);
+
 }

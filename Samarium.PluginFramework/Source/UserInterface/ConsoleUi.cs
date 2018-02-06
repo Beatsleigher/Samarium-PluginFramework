@@ -19,7 +19,7 @@ namespace Samarium.PluginFramework.UI {
         }
 
         internal static int GetConsoleCentre(string text) {
-            return ConsoleUI.ConsoleWidth / 2 - text.Length / 2;
+            return ConsoleWidth / 2 - text.Length / 2;
         }
 
         public static void SetCursorPosition(Coord coords) {
@@ -31,12 +31,12 @@ namespace Samarium.PluginFramework.UI {
         }
 
         public static void PrintLeft(string text, int yCoord) {
-            ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates(0, yCoord));
+            SetCursorPosition(GetCoordinates(0, yCoord));
             Console.Write(text);
         }
 
         public static void PrintCentre(string text, int yCoord) {
-            ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates(ConsoleUI.GetConsoleCentre(text), yCoord));
+            SetCursorPosition(GetCoordinates(GetConsoleCentre(text), yCoord));
             Console.Write(text);
         }
 
@@ -46,12 +46,12 @@ namespace Samarium.PluginFramework.UI {
             Console.BackgroundColor = textBackground;
             Console.ForegroundColor = textForeground;
             if (!text.Contains("\n")) {
-                ConsoleUI.Print(maxXCoord / 2 - text.Length / 2, yCoord, text);
+                Print(maxXCoord / 2 - text.Length / 2, yCoord, text);
             } else {
                 string str1 = text;
                 char[] chArray = new char[1] { '\n' };
                 foreach (string str2 in str1.Split(chArray))
-                    ConsoleUI.Print(maxXCoord / 2 - str2.Length / 2, yCoord++, text);
+                    Print(maxXCoord / 2 - str2.Length / 2, yCoord++, text);
             }
             Console.BackgroundColor = backgroundColor;
             Console.ForegroundColor = textForeground;
@@ -65,18 +65,18 @@ namespace Samarium.PluginFramework.UI {
             if (!text.Contains("\n")) {
                 if (clearArea) {
                     StringBuilder stringBuilder = new StringBuilder().Append(' ', text.Length);
-                    ConsoleUI.Print(maxXCoord / 2 - text.Length / 2, yCoord, stringBuilder.ToString());
+                    Print(maxXCoord / 2 - text.Length / 2, yCoord, stringBuilder.ToString());
                 }
-                ConsoleUI.Print(maxXCoord / 2 - text.Length / 2, yCoord, text);
+                Print(maxXCoord / 2 - text.Length / 2, yCoord, text);
             } else {
                 string str1 = text;
                 char[] chArray = new char[1] { '\n' };
                 foreach (string str2 in str1.Split(chArray)) {
                     if (clearArea) {
                         StringBuilder stringBuilder = new StringBuilder().Append(' ', str2.Length);
-                        ConsoleUI.Print(maxXCoord / 2 - str2.Length / 2, yCoord, stringBuilder.ToString());
+                        Print(maxXCoord / 2 - str2.Length / 2, yCoord, stringBuilder.ToString());
                     }
-                    ConsoleUI.Print(maxXCoord / 2 - str2.Length / 2, ++yCoord, str2.Replace("\n", ""));
+                    Print(maxXCoord / 2 - str2.Length / 2, ++yCoord, str2.Replace("\n", ""));
                 }
             }
             Console.BackgroundColor = backgroundColor;
@@ -84,7 +84,7 @@ namespace Samarium.PluginFramework.UI {
         }
 
         public static void PrintRight(string text, int yCoord, int offset = 0) {
-            ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates(ConsoleUI.ConsoleWidth - text.Length - offset, yCoord));
+            SetCursorPosition(GetCoordinates(ConsoleWidth - text.Length - offset, yCoord));
             Console.Write(text);
         }
 
@@ -92,13 +92,13 @@ namespace Samarium.PluginFramework.UI {
             var splitString = text.Split('\r', '\n');
             var divident = ConsoleHeight / 2 - splitString.Length / 2;
             for (var i = 0; i < splitString.Length; i++) {
-                ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates(ConsoleUI.GetConsoleCentre(splitString[i]), divident + i));
+                SetCursorPosition(GetCoordinates(GetConsoleCentre(splitString[i]), divident + i));
                 Console.Write(text);
             }
         }
 
         public static void CinematicPrint(string text, Coord coords, int timeDelayInMs = 50) {
-            ConsoleUI.SetCursorPosition(coords);
+            SetCursorPosition(coords);
             foreach (char ch in text.ToCharArray()) {
                 Console.Write(ch);
                 Thread.Sleep(timeDelayInMs);
@@ -107,7 +107,7 @@ namespace Samarium.PluginFramework.UI {
 
         public static void Print(int x, int y, string text) {
             if (!text.Contains("\n")) {
-                ConsoleUI.SetCursorPosition(new Coord() {
+                SetCursorPosition(new Coord() {
                     x = x,
                     y = y
                 });
@@ -116,7 +116,7 @@ namespace Samarium.PluginFramework.UI {
                 string str1 = text;
                 char[] chArray = new char[1] { '\n' };
                 foreach (string str2 in str1.Split(chArray)) {
-                    ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates(x, y++));
+                    SetCursorPosition(GetCoordinates(x, y++));
                     Console.Write(str2);
                 }
             }
@@ -124,56 +124,63 @@ namespace Samarium.PluginFramework.UI {
 
         public static void PrintFullScreenBorder(BorderType borderType = BorderType.DoubleBorder, string title = "", string version = "") {
             Coord coords;
-            for (int index1 = 0; index1 < ConsoleUI.ConsoleHeight; ++index1) {
-                if (index1 == 0 || index1 == ConsoleUI.ConsoleHeight - 1) {
-                    for (int index2 = 0; index2 < ConsoleUI.ConsoleWidth; ++index2) {
-                        coords = new Coord();
-                        coords.x = index2;
-                        coords.y = index1;
-                        ConsoleUI.SetCursorPosition(coords);
-                        Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.Horizontal));
+            for (int index1 = 0; index1 < ConsoleHeight; ++index1) {
+                if (index1 == 0 || index1 == ConsoleHeight - 1) {
+                    for (int index2 = 0; index2 < ConsoleWidth; ++index2) {
+                        coords = new Coord {
+                            x = index2,
+                            y = index1,
+                        };
+                        SetCursorPosition(coords);
+                        Console.Write(GetBorderChar(borderType, CharType.Horizontal));
                     }
                     if (index1 == 0) {
-                        coords = new Coord();
-                        coords.x = 0;
-                        coords.y = index1;
-                        ConsoleUI.SetCursorPosition(coords);
-                        Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.TopLeftCorner));
-                        coords = new Coord();
-                        coords.x = ConsoleUI.ConsoleWidth - 1;
-                        coords.y = index1;
-                        ConsoleUI.SetCursorPosition(coords);
-                        Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.TopRightCorner));
-                    } else if (index1 == ConsoleUI.ConsoleHeight - 1) {
-                        coords = new Coord();
-                        coords.x = 0;
-                        coords.y = index1;
-                        ConsoleUI.SetCursorPosition(coords);
-                        Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.BottomLeftCorner));
-                        coords = new Coord();
-                        coords.x = ConsoleUI.ConsoleWidth - 1;
-                        coords.y = index1;
-                        ConsoleUI.SetCursorPosition(coords);
-                        Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.BottomRightCorner));
+                        coords = new Coord {
+                            x = 0,
+                            y = index1
+                        };
+                        SetCursorPosition(coords);
+                        Console.Write(GetBorderChar(borderType, CharType.TopLeftCorner));
+                        coords = new Coord {
+                            x = ConsoleWidth - 1,
+                            y = index1
+                        };
+                        SetCursorPosition(coords);
+                        Console.Write(GetBorderChar(borderType, CharType.TopRightCorner));
+                    } else if (index1 == ConsoleHeight - 1) {
+                        coords = new Coord {
+                            x = 0,
+                            y = index1
+                        };
+                        SetCursorPosition(coords);
+                        Console.Write(GetBorderChar(borderType, CharType.BottomLeftCorner));
+                        coords = new Coord {
+                            x = ConsoleWidth - 1,
+                            y = index1
+                        };
+                        SetCursorPosition(coords);
+                        Console.Write(GetBorderChar(borderType, CharType.BottomRightCorner));
                     }
                 } else {
-                    coords = new Coord();
-                    coords.x = 0;
-                    coords.y = index1;
-                    ConsoleUI.SetCursorPosition(coords);
-                    Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.Vertical));
-                    coords = new Coord();
-                    coords.x = ConsoleUI.ConsoleWidth - 1;
-                    coords.y = index1;
-                    ConsoleUI.SetCursorPosition(coords);
-                    Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.Vertical));
+                    coords = new Coord {
+                        x = 0,
+                        y = index1
+                    };
+                    SetCursorPosition(coords);
+                    Console.Write(GetBorderChar(borderType, CharType.Vertical));
+                    coords = new Coord {
+                        x = ConsoleWidth - 1,
+                        y = index1
+                    };
+                    SetCursorPosition(coords);
+                    Console.Write(GetBorderChar(borderType, CharType.Vertical));
                 }
             }
             if (!string.IsNullOrEmpty(title))
-                ConsoleUI.PrintCentre(title, 0);
+                PrintCentre(title, 0);
             if (string.IsNullOrEmpty(version))
                 return;
-            ConsoleUI.PrintRight(version, 0, 3);
+            PrintRight(version, 0, 3);
         }
 
         public static void PrintTopTitle(string title, string version = "") {
@@ -185,28 +192,28 @@ namespace Samarium.PluginFramework.UI {
 
         public static void PrintBox(uint startX, uint startY, uint width, uint height, BorderType borderType = BorderType.DoubleBorder, CharType topLeftCorner = CharType.TopLeftCorner, CharType topRightCorner = CharType.TopRightCorner, CharType bottomLeftCorner = CharType.BottomLeftCorner, CharType bottomRightCorner = CharType.BottomRightCorner, string title = "") {
             for (int index = 0; (long)index < (long)height; ++index) {
-                ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates((int)startX, index + (int)startY));
-                Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.Vertical));
-                ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates((int)startX + (int)width, index + (int)startY));
-                Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.Vertical));
+                SetCursorPosition(GetCoordinates((int)startX, index + (int)startY));
+                Console.Write(GetBorderChar(borderType, CharType.Vertical));
+                SetCursorPosition(GetCoordinates((int)startX + (int)width, index + (int)startY));
+                Console.Write(GetBorderChar(borderType, CharType.Vertical));
             }
             for (int index = 0; (long)index < (long)width; ++index) {
-                ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates((int)startX + index, (int)startY));
-                Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.Horizontal));
-                ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates((int)startX + index, (int)startY + (int)height - 1));
-                Console.Write(ConsoleUI.GetBorderChar(borderType, CharType.Horizontal));
+                SetCursorPosition(GetCoordinates((int)startX + index, (int)startY));
+                Console.Write(GetBorderChar(borderType, CharType.Horizontal));
+                SetCursorPosition(GetCoordinates((int)startX + index, (int)startY + (int)height - 1));
+                Console.Write(GetBorderChar(borderType, CharType.Horizontal));
             }
-            ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates((int)startX, (int)startY));
-            Console.Write(ConsoleUI.GetBorderChar(borderType, topLeftCorner));
-            ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates((int)startX, (int)startY + (int)height - 1));
-            Console.Write(ConsoleUI.GetBorderChar(borderType, bottomLeftCorner));
-            ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates((int)startX + (int)width, (int)startY));
-            Console.Write(ConsoleUI.GetBorderChar(borderType, topRightCorner));
-            ConsoleUI.SetCursorPosition(ConsoleUI.GetCoordinates((int)startX + (int)width, (int)startY + (int)height - 1));
-            Console.Write(ConsoleUI.GetBorderChar(borderType, bottomRightCorner));
+            SetCursorPosition(GetCoordinates((int)startX, (int)startY));
+            Console.Write(GetBorderChar(borderType, topLeftCorner));
+            SetCursorPosition(GetCoordinates((int)startX, (int)startY + (int)height - 1));
+            Console.Write(GetBorderChar(borderType, bottomLeftCorner));
+            SetCursorPosition(GetCoordinates((int)startX + (int)width, (int)startY));
+            Console.Write(GetBorderChar(borderType, topRightCorner));
+            SetCursorPosition(GetCoordinates((int)startX + (int)width, (int)startY + (int)height - 1));
+            Console.Write(GetBorderChar(borderType, bottomRightCorner));
             if (string.IsNullOrEmpty(title))
                 return;
-            ConsoleUI.PrintCentre(title, (int)width, (int)startY, ConsoleColor.Black, ConsoleColor.White);
+            PrintCentre(title, (int)width, (int)startY, ConsoleColor.Black, ConsoleColor.White);
         }
 
         public static char GetBorderChar(BorderType borderType, CharType charType) {
@@ -382,14 +389,14 @@ namespace Samarium.PluginFramework.UI {
         }
 
         public static void Clear(uint yCoord) {
-            StringBuilder stringBuilder = new StringBuilder().Append(' ', ConsoleUI.ConsoleWidth - 1);
-            ConsoleUI.Print(0, (int)yCoord, stringBuilder.ToString());
+            StringBuilder stringBuilder = new StringBuilder().Append(' ', ConsoleWidth - 1);
+            Print(0, (int)yCoord, stringBuilder.ToString());
         }
 
         public static void Clear(uint xCoordStart, uint xCoordEnd, uint yCoordStart, uint yCoordEnd) {
             for (uint index1 = yCoordStart; index1 < yCoordEnd; ++index1) {
                 for (uint index2 = xCoordStart; index2 < xCoordEnd; ++index2)
-                    ConsoleUI.Print((int)index2, (int)index1, " ");
+                    Print((int)index2, (int)index1, " ");
             }
         }
 
@@ -397,17 +404,17 @@ namespace Samarium.PluginFramework.UI {
             try {
                 if (value < 0 || (long)value >= (long)width)
                     return;
-                Coord coordinates = ConsoleUI.GetCoordinates(Console.CursorLeft, Console.CursorTop);
+                Coord coordinates = GetCoordinates(Console.CursorLeft, Console.CursorTop);
                 int num = (int)width - 2 - value;
                 StringBuilder stringBuilder = new StringBuilder().Append('[').Append((char)style, value);
                 if (num > 0)
                     stringBuilder.Append(' ', (int)width - 2 - value);
                 stringBuilder.Append(']');
                 if (xCoord < 0)
-                    ConsoleUI.PrintCentre(stringBuilder.ToString(), (int)yCoord);
+                    PrintCentre(stringBuilder.ToString(), (int)yCoord);
                 else
-                    ConsoleUI.Print(xCoord, (int)yCoord, stringBuilder.ToString());
-                ConsoleUI.SetCursorPosition(coordinates);
+                    Print(xCoord, (int)yCoord, stringBuilder.ToString());
+                SetCursorPosition(coordinates);
             } catch {
             }
         }

@@ -33,10 +33,8 @@ namespace Samarium.IO {
 
         [System.Security.SecuritySafeCritical]  // auto-generated 
         public StringReader(String s) {
-            if (s == null)
-                throw new ArgumentNullException("s");
             Contract.EndContractBlock();
-            _s = s;
+            _s = s ?? throw new ArgumentNullException("s");
             _length = s == null ? 0 : s.Length;
         }
 

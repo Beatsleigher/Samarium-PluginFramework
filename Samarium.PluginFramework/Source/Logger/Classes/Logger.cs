@@ -452,7 +452,7 @@ namespace Samarium.PluginFramework.Logger {
         /// </summary>
         /// <param name="cfg">The new config object.</param>
         public Logger SetConfig(IConfig cfg) {
-            SystemConfig = SystemConfig == null ? cfg : SystemConfig;
+            SystemConfig = SystemConfig ?? cfg;
             return this;
         }
 		#endregion

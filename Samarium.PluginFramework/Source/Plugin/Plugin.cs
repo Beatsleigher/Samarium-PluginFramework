@@ -15,6 +15,7 @@ namespace Samarium.PluginFramework.Plugin {
     public abstract class Plugin : IPlugin {
 
         private readonly Logger log;
+        internal event GetSystemWideConfigEventHandler GetSystemWideConfigEvent;
 
         /// <summary>
         /// Constructor; instantiates an instance of this class. 
@@ -29,7 +30,7 @@ namespace Samarium.PluginFramework.Plugin {
                 .Execute(execArgs);
         }
 
-        protected abstract IConfig PluginConfig { get; }
+        internal protected abstract IConfig PluginConfig { get; }
 
         /// <summary>
         /// Gets the name of the plugin.
@@ -170,6 +171,15 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="args">The command's arguments.</param>
         /// <returns>The command's result.</returns>
         protected async Task<ICommandResult> ExecuteCommandAsync(string commandTag, params string[] args) => await PluginRegistry.Instance.ExecuteCommandAsync(this, commandTag, args);
+
+        /// <summary>
+        /// Attempts to retrieve a config from somwhere in the application.
+        /// This method is usually used to retrieve configurations from other plugins, without having to directly read their configuration files,
+        /// which may potentially damage the application, or resources it is using.
+        /// </summary>
+        /// <param name="configKey">The key of the desired config</param>
+        /// <returns></returns>
+        protected object GetSystemWideConfig(string configKey, string pluginName = default) => GetSystemWideConfigEvent?.Invoke(configKey, pluginName);
         #endregion
 
         #region Properties

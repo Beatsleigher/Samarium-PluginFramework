@@ -23,6 +23,9 @@ namespace Samarium.PluginFramework {
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.NamingConventions;
 
+    /// <summary>
+    /// Contains useful extension methods for use within and around Samarium(.PluginFramework)
+    /// </summary>
     public static class Extensions {
 
         // This constant is used to determine the keysize of the encryption algorithm in bits.
@@ -279,6 +282,7 @@ namespace Samarium.PluginFramework {
                 }
             }
         }
+
         /// <summary>
         /// Encryptes a plaintext string, and writes the encrypted string as a byte stream to a file.
         /// </summary>
@@ -473,6 +477,13 @@ namespace Samarium.PluginFramework {
             return enumerable;
         }
 
+        /// <summary>
+        /// Serialises a given object using the passed serialisation type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <param name="serializationType"></param>
+        /// <returns>The serialised object.</returns>
         public static string Serialize<T>(this T obj, ConfigSerializationType serializationType = ConfigSerializationType.Yaml) {
             switch (serializationType) {
                 case ConfigSerializationType.Yaml:
@@ -486,6 +497,11 @@ namespace Samarium.PluginFramework {
             }
         }
 
+        /// <summary>
+        /// Converts a YAML boolean (yes/no) to a true/false value.
+        /// </summary>
+        /// <param name="string"></param>
+        /// <returns></returns>
         public static string ConvertYamlBool(this string @string) {
 
             if (YamlYesRegex.IsMatch(@string))
@@ -582,18 +598,41 @@ namespace Samarium.PluginFramework {
                 return list;
             using (var provider = new RNGCryptoServiceProvider()) {
                 var n = list.Count;
+                var loopCondition = 0d;
 
-                while (n > 1) {
-                    var box = new byte[1];
-                    do
-                        provider.GetBytes(box);
-                    while (!(box[0] < n * (byte.MaxValue / n)));
+                if (n > byte.MaxValue) {
+                    while (n > 1) {
+                        var box = (ushort)0;
+                        var tmpBox = new byte[4];
+                        loopCondition = n * (double)(ushort.MaxValue / n);
 
-                    var k = (box[0] % n);
-                    n--;
-                    var value = list[k];
-                    list[k] = list[n];
-                    list[n] = value;
+
+                        do {
+                            provider.GetBytes(tmpBox);
+                            box = BitConverter.ToUInt16(tmpBox, 0);
+                        } while (!(box < loopCondition));
+
+                        var k = (box % n);
+                        n--;
+                        var value = list[k];
+                        list[k] = list[n];
+                        list[n] = value;
+                    }
+                } else {
+                    while (n > 1) {
+                        var box = new byte[1];
+                        loopCondition = n * (double)(byte.MaxValue / n);
+
+                        do
+                            provider.GetBytes(box);
+                        while (!(box[0] < loopCondition));
+
+                        var k = (box[0] % n);
+                        n--;
+                        var value = list[k];
+                        list[k] = list[n];
+                        list[n] = value;
+                    }
                 }
             }
             return list;
@@ -804,6 +843,79 @@ namespace Samarium.PluginFramework {
             var sha = new SHA256Managed();
             var computedDigest = sha.ComputeHash(bytes);
             return computedDigest;
+        }
+
+        /// <summary>
+        /// Searches a directory for the newest file and returns or its default value.
+        /// </summary>
+        /// <param name="dirInfo">The directory to search in</param>
+        /// <param name="recursive">Set to <code>true</code> to search the directory recursively.</param>
+        /// <returns></returns>
+        public static FileInfo GetNewestFileOrDefault(this DirectoryInfo dirInfo,  bool recursive = true) {
+            if (recursive) {
+                return dirInfo.GetFiles()
+                              .OrderByDescending(f => f.LastWriteTime)
+                              .FirstOrDefault();
+            } else {
+                return dirInfo.GetFiles()
+                              .Union(dirInfo.GetDirectories().Select(d => d.GetNewestFileOrDefault()))
+                              .OrderByDescending(f => f is default ? DateTime.MinValue : f.LastWriteTime)
+                              .FirstOrDefault();
+            }
+        }
+
+        /// <summary>
+        /// Digests (hashes) a given directory.
+        /// </summary>
+        /// <param name="directory">The directory to digest</param>
+        /// <param name="recursive">Set to <code>true</code> to recursively digest directory.</param>
+        /// <param name="hashFileName" >If not default (null), the digest for the current directory will be written to said file.</param>
+        /// <param name="filesToSkip" >An optional list of files (names) to skip.</param>
+        /// <returns>The resulting digest in form of a <code>byte[]</code></returns>
+        public static byte[] DigestDirectory(this DirectoryInfo directory, bool recursive = false, string hashFileName = default, params string[] filesToSkip) {
+            var digest = default(byte[]);
+
+            foreach (var file in directory.EnumerateFiles().Where(f => {
+                foreach (var pattern in filesToSkip) {
+                    if (Regex.IsMatch(f.Name, pattern))
+                        return false;
+                }
+                return true;
+            }))
+                if (digest is default)
+                    digest = file.Digest();
+                else
+                    digest.Xor(file.Digest());
+                
+            
+            if (recursive)
+                foreach (var subDir in directory.EnumerateDirectories())
+                    if (digest is default)
+                        digest = subDir.DigestDirectory(recursive, hashFileName, filesToSkip);
+                    else
+                        digest.Xor(subDir.DigestDirectory(recursive, hashFileName, filesToSkip));
+
+            if (!(hashFileName is default) && !string.IsNullOrEmpty(hashFileName)) {
+                File.WriteAllBytes(Path.Combine(directory.FullName, hashFileName), digest);
+            }
+
+            return digest;
+        }
+
+        public static void Xor(this byte[] buffer, byte[] sequence) {
+            if (buffer.Length != sequence.Length) {
+                if (buffer.Length > sequence.Length) {
+                    var tmp = sequence;
+                    sequence = new byte[buffer.Length];
+                    for (int i = 0; i < tmp.Length; i++)
+                        sequence[i] = tmp[i];
+                }
+            }
+
+            for (int i = 0; i < buffer.Length; i++) {
+                buffer[i] = (byte)(buffer[i] ^ sequence[i]);
+            }
+
         }
 
     }

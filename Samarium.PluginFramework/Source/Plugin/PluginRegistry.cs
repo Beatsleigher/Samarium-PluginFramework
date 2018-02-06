@@ -95,9 +95,10 @@ namespace Samarium.PluginFramework.Plugin {
             var assembly = pluginClass.GetType().Assembly;
             if (type is default)
                 return false;
+            var exitValue = pluginClass.OnStop();
             ListOfPlugins.Remove(assembly);
             pluginInstances.Remove(pluginClass);
-            return pluginClass.OnStop();
+            return exitValue;
         }
 
         /// <summary>Registers the plugin.</summary>
@@ -123,8 +124,11 @@ namespace Samarium.PluginFramework.Plugin {
             pluginInstances.Add(pluginClass);
             var startSuccess = pluginClass.OnStart();
 
-            if (startSuccess)
+            if (startSuccess) {
                 pluginClass.OnLoaded();
+                // Register plugin's system-wide configuration getter method
+                (pluginClass as Plugin).GetSystemWideConfigEvent += GetSystemWideConfig;
+            }
 
         }
 
@@ -287,6 +291,36 @@ namespace Samarium.PluginFramework.Plugin {
         /// <param name="pluginName">The plugin name to check against.</param>
         /// <returns></returns>
         public IPlugin GetPlugin(string pluginName) => PluginInstances.FirstOrDefault(x => x.PluginName.ToLowerInvariant() == pluginName.ToLowerInvariant());
+
+        private object GetSystemWideConfig(string configKey, string pluginName = default) {
+
+            if (string.IsNullOrEmpty(configKey))
+                throw new ArgumentNullException(nameof(configKey), "Configuration key must not be null!");
+
+            var plugin = default(Plugin);
+
+            if (pluginName is default)
+                plugin = pluginInstances.Select(pl => pl as Plugin)?
+                                        .FirstOrDefault(pl => !(pl is default) && PluginHasConfig(pl, configKey));
+            else
+                plugin = pluginInstances.Select(pl => pl as Plugin)
+                                        .FirstOrDefault(pl => pl.PluginName.ToLowerInvariant() == pluginName.ToLowerInvariant());
+
+            if (plugin is default || plugin.PluginConfig is default)
+                if (SystemConfig.TryGetConfig<object>(configKey, out var _cfgObj))
+                    return _cfgObj;
+                else return default;
+
+            if (plugin.PluginConfig.TryGetConfig<object>(configKey, out var cfgObj)) {
+                return cfgObj;
+            }
+
+            return default;
+        }
+
+        private bool PluginHasConfig(Plugin plugin, string config) {
+            return plugin.PluginConfig?.HasKey(config) == true;
+        }
 
     }
 }
