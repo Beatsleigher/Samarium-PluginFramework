@@ -2,15 +2,6 @@
 
 namespace Samarium.PluginFramework.Rest {
 
-    using Newtonsoft.Json;
-
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.ServiceModel;
-    using System.ServiceModel.Web;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// Interface for defining RESTful routes and their subsequent 
     /// handlers.
@@ -20,7 +11,7 @@ namespace Samarium.PluginFramework.Rest {
     /// 
     /// <code >
     /// [ServiceContract(Name = "MyUniqueServiceContractName")]
-    /// public class MyPluginRoutes: IRoutesContainer {
+    /// public class MyPluginRoutes: IEndpointContainer {
     ///     
     ///     [OperationContract]
     ///     [WebGet(BodyStyle = WebMessageBodyStyle.Bare, ResponseFormat = WebMessageFormat.Json, UriTemplate = "/mygetroute")]
@@ -39,9 +30,15 @@ namespace Samarium.PluginFramework.Rest {
     /// </code>
     /// 
     /// </example>
-    public abstract class IRoutesContainer {
-
-
+    public interface IEndpointContainer {
+        
+        /// <summary>
+        /// Gets or sets the base address for the endpoint container the plugin exposes.
+        /// This must NOT contain the protocol, host, port or anything concerning the actual routing to the application.
+        /// Essentially the base URL will be built as such:
+        /// application-provided: http://hostname:port/{your_base_here}[/your_other_routes]!
+        /// </summary>
+        string ServiceEndpointBase { get; }
 
     }
 }

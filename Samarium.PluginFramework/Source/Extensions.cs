@@ -377,7 +377,7 @@ namespace Samarium.PluginFramework {
         /// <typeparam name="T">The type inside of the list.</typeparam>
         /// <param name="list">The list to remove elements from</param>
         /// <param name="pred">The predicate defining the criteria to delete the items.</param>
-        /// <returns>The list without the items matching the criteria in <paramref name="pred"/></returns>
+        /// <returns>The list without the items matching the criteria in <paramref name="pred"/></returns>s
         public static IEnumerable<T> Remove<T>(this IEnumerable<T> list, Predicate<T> pred) {
             var _list = list.ToList();
             foreach (var elem in list)
@@ -517,14 +517,14 @@ namespace Samarium.PluginFramework {
         /// </summary>
         /// <param name="routesContainer"></param>
         /// <returns></returns>
-        public static IncomingWebRequestContext GetIncomingWebRequest(this IRoutesContainer _) => WebOperationContext.Current.IncomingRequest;
+        public static IncomingWebRequestContext GetIncomingWebRequest(this IEndpointContainer _) => WebOperationContext.Current.IncomingRequest;
 
         /// <summary>
         /// Gets the outgoing web response.
         /// </summary>
         /// <param name="routesContainer"></param>
         /// <returns></returns>
-        public static OutgoingWebResponseContext GetOutgoingWebResponse(this IRoutesContainer _) => WebOperationContext.Current.OutgoingResponse;
+        public static OutgoingWebResponseContext GetOutgoingWebResponse(this IEndpointContainer _) => WebOperationContext.Current.OutgoingResponse;
 
         /// <summary>
         /// Gets a <see cref="Stream"/> of bytes containing HTML code
@@ -532,7 +532,7 @@ namespace Samarium.PluginFramework {
         /// <param name="routesContainer"></param>
         /// <param name="htmlString">The string to convert.</param>
         /// <returns>A <see cref="MemoryStream"/></returns>
-        public static Stream GetHtmlStream(this IRoutesContainer _, string htmlString) => new MemoryStream(Encoding.UTF8.GetBytes(htmlString));
+        public static Stream GetHtmlStream(this IEndpointContainer _, string htmlString) => new MemoryStream(Encoding.UTF8.GetBytes(htmlString));
 
         /// <summary>
         /// Gets a <see cref="Stream"/> of bytes containing JSON text.
@@ -540,7 +540,7 @@ namespace Samarium.PluginFramework {
         /// <param name="routesContainer"></param>
         /// <param name="objs">The objects to serialise.</param>
         /// <returns>A <see cref="MemoryStream"/></returns>
-        public static Stream GetJsonStream(this IRoutesContainer _, params object[] objs) {
+        public static Stream GetJsonStream(this IEndpointContainer _, params object[] objs) {
             return new MemoryStream(JsonConvert.SerializeObject(objs).GetBytes());
         }
 
@@ -550,7 +550,7 @@ namespace Samarium.PluginFramework {
         /// <param name="routesContainer"></param>
         /// <param name="objs">The objects to serialise.</param>
         /// <returns>A <see cref="MemoryStream"/></returns>
-        public static Stream GetPrettyJsonStream(this IRoutesContainer _, params object[] objs) {
+        public static Stream GetPrettyJsonStream(this IEndpointContainer _, params object[] objs) {
             return new MemoryStream(JsonConvert.SerializeObject(objs, Formatting.Indented).GetBytes());
         }
 
@@ -560,7 +560,7 @@ namespace Samarium.PluginFramework {
         /// <param name="routesContainer"></param>
         /// <param name="objs">The objects to serialise.</param>
         /// <returns>A <see cref="MemoryStream"/></returns>
-        public static Stream GetYamlStream(this IRoutesContainer _, params object[] objs) {
+        public static Stream GetYamlStream(this IEndpointContainer _, params object[] objs) {
             var yamlSerializer = new SerializerBuilder().Build();
             return new MemoryStream(yamlSerializer.Serialize(objs).GetBytes());
         }
@@ -829,20 +829,29 @@ namespace Samarium.PluginFramework {
         /// </remarks>
         /// <param name="fInfo"></param>
         /// <returns>An array of bytes containing a digested file.</returns>
-        public static byte[] Digest(this FileInfo fInfo) => File.ReadAllBytes(fInfo.FullName).Digest();
+        public static byte[] Digest(this FileInfo fInfo) {
+            var fileBytes = File.ReadAllBytes(fInfo.FullName).Digest();
+            var fileNameBytes = fInfo.Name.Select(c => (byte)c).ToArray().Digest();
+
+            // Create byte array consisting of file name and content digestion
+            fileNameBytes.Xor(fileBytes);
+            return fileNameBytes;
+        }
 
         /// <summary>
         /// Digests a given array of bytes and returns another array of bytes containing the digested data.
         /// </summary>
         /// <remarks>
-        /// Digestion is performe using the SHA256 algorithm.
+        /// Digestion is performed using the SHA256 algorithm.
+        /// Digestion results in an array length of 32 bytes (256 bits).
         /// </remarks>
         /// <param name="bytes">The data to digest.</param>
         /// <returns>An array of bytes containing the digested data.</returns>
         public static byte[] Digest(this byte[] bytes) {
-            var sha = new SHA256Managed();
-            var computedDigest = sha.ComputeHash(bytes);
-            return computedDigest;
+            using (var sha = new SHA256Managed()) {
+                var computedDigest = sha.ComputeHash(bytes);
+                return computedDigest;
+            }
         }
 
         /// <summary>
@@ -875,13 +884,8 @@ namespace Samarium.PluginFramework {
         public static byte[] DigestDirectory(this DirectoryInfo directory, bool recursive = false, string hashFileName = default, params string[] filesToSkip) {
             var digest = default(byte[]);
 
-            foreach (var file in directory.EnumerateFiles().Where(f => {
-                foreach (var pattern in filesToSkip) {
-                    if (Regex.IsMatch(f.Name, pattern))
-                        return false;
-                }
-                return true;
-            }))
+            var filesToDigest = directory.EnumerateFiles().Where(f => { foreach (var pattern in filesToSkip) { if (Regex.IsMatch(f.Name, pattern)) return false; } return true; });
+            foreach (var file in filesToDigest)
                 if (digest is default)
                     digest = file.Digest();
                 else
@@ -899,10 +903,25 @@ namespace Samarium.PluginFramework {
                 File.WriteAllBytes(Path.Combine(directory.FullName, hashFileName), digest);
             }
 
-            return digest;
+            return digest ?? (digest = new byte[32]);
         }
 
+        /// <summary>
+        /// Compares two byte arrays using XOR (eXclusive OR).
+        /// </summary>
+        /// <param name="buffer">The original byte array</param>
+        /// <param name="sequence">The byte array to compare the first to.</param>
+        /// <remarks>
+        /// If the second array is smaller than the first, it will be extended to match the length of the first.
+        /// 
+        /// The comparison will take place directory on the buffer array.
+        /// </remarks>
         public static void Xor(this byte[] buffer, byte[] sequence) {
+            if (buffer is default)
+                buffer = new byte[sequence?.Length ?? 32];
+            if (sequence is default)
+                sequence = new byte[buffer.Length];
+
             if (buffer.Length != sequence.Length) {
                 if (buffer.Length > sequence.Length) {
                     var tmp = sequence;
@@ -916,6 +935,50 @@ namespace Samarium.PluginFramework {
                 buffer[i] = (byte)(buffer[i] ^ sequence[i]);
             }
 
+        }
+
+        /// <summary>
+        /// Compares two byte arrays for equality.
+        /// </summary>
+        /// <remarks >
+        /// Code from StackOverflow user https://stackoverflow.com/users/2375119/arekbulski
+        /// </remarks>
+        /// <param name="data1">The first array</param>
+        /// <param name="data2">The second array to compare against.</param>
+        /// <returns><code>true</code> if the byte arrays are equal.</returns>
+        public static unsafe bool EqualBytesLongUnrolled(this byte[] data1, byte[] data2) {
+            if (data1 == data2)
+                return true;
+            if (data1.Length != data2.Length)
+                return false;
+
+            fixed (byte* bytes1 = data1, bytes2 = data2) {
+                int len = data1.Length;
+                int rem = len % (sizeof(long) * 16);
+                long* b1 = (long*)bytes1;
+                long* b2 = (long*)bytes2;
+                long* e1 = (long*)(bytes1 + len - rem);
+
+                while (b1 < e1) {
+                    if (*(b1)      != *(b2)      || *(b1 + 1) != *(b2 + 1)   ||
+                        *(b1 + 2)  != *(b2 + 2)  || *(b1 + 3) != *(b2 + 3)   ||
+                        *(b1 + 4)  != *(b2 + 4)  || *(b1 + 5) != *(b2 + 5)   ||
+                        *(b1 + 6)  != *(b2 + 6)  || *(b1 + 7) != *(b2 + 7)   ||
+                        *(b1 + 8)  != *(b2 + 8)  || *(b1 + 9) != *(b2 + 9)   ||
+                        *(b1 + 10) != *(b2 + 10) || *(b1 + 11) != *(b2 + 11) ||
+                        *(b1 + 12) != *(b2 + 12) || *(b1 + 13) != *(b2 + 13) ||
+                        *(b1 + 14) != *(b2 + 14) || *(b1 + 15) != *(b2 + 15))
+                        return false;
+                    b1 += 16;
+                    b2 += 16;
+                }
+
+                for (int i = 0; i < rem; i++)
+                    if (data1[len - 1 - i] != data2[len - 1 - i])
+                        return false;
+
+                return true;
+            }
         }
 
     }

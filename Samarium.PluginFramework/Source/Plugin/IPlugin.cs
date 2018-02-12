@@ -4,9 +4,10 @@ using System;
 namespace Samarium.PluginFramework.Plugin {
 
     using Samarium.PluginFramework.Command;
-    
+    using Samarium.PluginFramework.Rest;
     using System.Collections.Generic;
     using System.Linq;
+    using System.ServiceModel.Description;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -18,39 +19,18 @@ namespace Samarium.PluginFramework.Plugin {
     public interface IPlugin {
 
         /// <summary>
-        /// Gets the name of the plugin.
-        /// Ideally has the name of the class inheriting this interface!
+        /// Attempts to get a command from this plugin.
         /// </summary>
-        string PluginName { get; }
+        /// <param name="command">The command to retrieve.</param>
+        /// <returns>The command.</returns>
+        ICommand GetCommand(ICommand command);
 
         /// <summary>
-        /// Gets the commands this plugin provides.
+        /// Attempts to get a command from this plugin.
         /// </summary>
-        List<ICommand> PluginCommands { get; }
-
-        /// <summary>
-        /// Plugin initialisation.
-        /// Handles all plugin init routines and returns either one of two states. (See returns section)
-        /// </summary>
-        /// <returns>
-        /// Returns <code >true</code> if plugin initialisation was successful, <code >false</code> otherwise.
-        /// </returns>
-        bool OnStart();
-
-        /// <summary>
-        /// Method called by main system once the plugin has been successfully loaded.
-        /// This method can then be used to initialise certain features that the plugin provides automatically, 
-        /// such as beginning a threaded operation, designed to live as long as the main system.
-        /// </summary>
-        void OnLoaded();
-
-        /// <summary>
-        /// Plugin termination.
-        /// Similar to <see cref="IDisposable.Dispose"/>.
-        /// Frees resources and allows plugins (and thus the application) to cleany shut down.
-        /// </summary>
-        /// <returns><code >true</code> if plugin termination was successful. <code >false</code> otherwise.</returns>
-        bool OnStop();
+        /// <param name="commandTag">The command to retrieve.</param>
+        /// <returns>The command.</returns>
+        ICommand GetCommand(string commandTag);
 
         /// <summary>
         /// Gets a value indicating whether the inheriting plugin contains
@@ -68,18 +48,9 @@ namespace Samarium.PluginFramework.Plugin {
         bool HasCommand(string commandTag);
 
         /// <summary>
-        /// Attempts to get a command from this plugin.
+        /// Gets or sets a value indicating whether a plugin will log to its respective log file or not.
         /// </summary>
-        /// <param name="command">The command to retrieve.</param>
-        /// <returns>The command.</returns>
-        ICommand GetCommand(ICommand command);
-
-        /// <summary>
-        /// Attempts to get a command from this plugin.
-        /// </summary>
-        /// <param name="commandTag">The command to retrieve.</param>
-        /// <returns>The command.</returns>
-        ICommand GetCommand(string commandTag);
+        bool LogToFile { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether a plugin will log to the console or not.
@@ -87,9 +58,47 @@ namespace Samarium.PluginFramework.Plugin {
         bool LogToConsole { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether a plugin will log to its respective log file or not.
+        /// Method called by main system once the plugin has been successfully loaded.
+        /// This method can then be used to initialise certain features that the plugin provides automatically, 
+        /// such as beginning a threaded operation, designed to live as long as the main system.
         /// </summary>
-        bool LogToFile { get; set; }
+        void OnLoaded();
 
+        /// <summary>
+        /// Plugin initialisation.
+        /// Handles all plugin init routines and returns either one of two states. (See returns section)
+        /// </summary>
+        /// <returns>
+        /// Returns <code >true</code> if plugin initialisation was successful, <code >false</code> otherwise.
+        /// </returns>
+        bool OnStart();
+
+        /// <summary>
+        /// Plugin termination.
+        /// Similar to <see cref="IDisposable.Dispose"/>.
+        /// Frees resources and allows plugins (and thus the application) to cleany shut down.
+        /// </summary>
+        /// <returns><code >true</code> if plugin termination was successful. <code >false</code> otherwise.</returns>
+        bool OnStop();
+
+        /// <summary>
+        /// Gets the commands this plugin provides.
+        /// </summary>
+        List<ICommand> PluginCommands { get; }
+
+        /// <summary>
+        /// Gets the name of the plugin.
+        /// Ideally has the name of the class inheriting this interface!
+        /// </summary>
+        string PluginName { get; }
+
+        /// <summary>
+        /// Retrieves the RESTful endpoints defined by this plugin which
+        /// are then loaded in to the application's RESTful service.
+        /// These endpoints MUST be defined before the plugin hits the <see cref="OnLoaded"/> method!
+        /// </summary>
+        IEndpointContainer ServiceEndpointContainer { get; }
+
+        
     }
 }

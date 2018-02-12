@@ -8,17 +8,42 @@ namespace Samarium.PluginFramework.Common {
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Represents the domain a user is located in.
+    /// </summary>
     public class Domain {
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public Domain() { }
 
+        /// <summary>
+        /// Recommended constructor.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="users"></param>
         public Domain(string name, IEnumerable<DomainUser> users) {
             DomainName = name;
             Users = users;
         }
 
+        /// <summary>
+        /// Shorthand constructor.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="users"></param>
+        /// <param name="inputDir"></param>
+        /// <param name="outputDir"></param>
         public Domain(string name, IEnumerable<DomainUser> users, string inputDir, string outputDir): this(name, users, new DirectoryInfo(inputDir), new DirectoryInfo(outputDir)) { }
 
+        /// <summary>
+        /// Shorthand constructor.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="users"></param>
+        /// <param name="inputDir"></param>
+        /// <param name="outputDir"></param>
         public Domain(string name, IEnumerable<DomainUser> users, DirectoryInfo inputDir, DirectoryInfo outputDir): this(name, users) {
             InputDirectory = inputDir;
             OutputDirectory = outputDir;
@@ -44,6 +69,11 @@ namespace Samarium.PluginFramework.Common {
         /// </summary>
         public DirectoryInfo OutputDirectory { get; set; }
 
+        /// <summary>
+        /// Adds multiple users to this domain.
+        /// </summary>
+        /// <param name="users"></param>
+        /// <returns></returns>
         public Domain AddUsers(params DomainUser[] users) {
             foreach (var user in users)
                 user.ParentDomain = this;
@@ -53,6 +83,11 @@ namespace Samarium.PluginFramework.Common {
             return this;
         }
 
+        /// <summary>
+        /// Adds multiple users to this domain.
+        /// </summary>
+        /// <param name="users"></param>
+        /// <returns></returns>
         public Domain AddUsers(params string[] users) {
             if (Users is default)
                 Users = new List<DomainUser>();

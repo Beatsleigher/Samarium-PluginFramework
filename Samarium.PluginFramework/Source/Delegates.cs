@@ -13,6 +13,7 @@ namespace Samarium.PluginFramework {
     /// </summary>
     /// <param name="sender">The calling plugin.</param>
     /// <param name="requestedCommand">The command requested for execution.</param>
+    /// <param name="execArgs">The command's arguments.</param>
     /// <returns></returns>
     public delegate ICommandResult CommandExecutionRequestedHandler(IPlugin sender, string requestedCommand, params string[] execArgs);
 

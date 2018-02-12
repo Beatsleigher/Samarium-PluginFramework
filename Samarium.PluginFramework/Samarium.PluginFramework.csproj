@@ -22,6 +22,7 @@
     <WarningLevel>4</WarningLevel>
     <LangVersion>latest</LangVersion>
     <DocumentationFile>..\..\artifacts\doc\Samarium.PluginFramework.xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,6 +33,13 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\..\artifacts\doc\Samarium.PluginFramework.xml</DocumentationFile>
     <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Samarium_sign_key.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BouncyCastle.Crypto, Version=1.8.1.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
@@ -136,9 +144,6 @@
     <Reference Include="ServiceStack.Text, Version=5.0.0.0, Culture=neutral, PublicKeyToken=02c12cbda47e6587, processorArchitecture=MSIL">
       <HintPath>..\..\Memex\packages\ServiceStack.Text.5.0.2\lib\net45\ServiceStack.Text.dll</HintPath>
     </Reference>
-    <Reference Include="slockimp">
-      <HintPath>..\..\deadlock-detection\slockimp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Security" />
@@ -190,15 +195,17 @@
     <Compile Include="Source\Exceptions\CommandNotFoundException.cs" />
     <Compile Include="Source\Exceptions\ConfigNotFoundException.cs" />
     <Compile Include="Source\Extensions.cs" />
-    <Compile Include="Source\incslock.cs" />
     <Compile Include="Source\Logger\Classes\Logger.cs" />
     <Compile Include="Source\Logger\Enum\LogLevel.cs" />
     <Compile Include="Source\ModifiedDotNet\StringReader.cs" />
     <Compile Include="Source\Plugin\IPlugin.cs" />
     <Compile Include="Source\Plugin\Plugin.cs" />
     <Compile Include="Source\Plugin\PluginRegistry.cs" />
-    <Compile Include="Source\Rest\IRoutesContainer.cs" />
+    <Compile Include="Source\Rest\ExtendedServiceHostFactory.cs" />
+    <Compile Include="Source\Rest\IEndpointContainer.cs" />
+    <Compile Include="Source\Rest\RequestInspector.cs" />
     <Compile Include="Source\Rest\RestService.cs" />
+    <Compile Include="Source\Rest\RestService.ServiceContract.cs" />
     <Compile Include="Source\Rest\SamariumRoutesContainer.cs" />
     <Compile Include="Source\Threading\ThreadedOperation.cs" />
     <Compile Include="Source\UserInterface\BorderType.cs" />
@@ -211,6 +218,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Samarium_sign_key.pfx" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

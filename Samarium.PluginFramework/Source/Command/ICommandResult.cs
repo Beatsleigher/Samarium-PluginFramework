@@ -7,6 +7,9 @@ namespace Samarium.PluginFramework.Command {
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// The result of an executed command.
+    /// </summary>
     public interface ICommandResult {
 
         /// <summary>
@@ -16,6 +19,10 @@ namespace Samarium.PluginFramework.Command {
 
     }
 
+    /// <summary>
+    /// A genericised result of an executed command.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface ICommandResult<T>: ICommandResult {
 
         /// <summary>

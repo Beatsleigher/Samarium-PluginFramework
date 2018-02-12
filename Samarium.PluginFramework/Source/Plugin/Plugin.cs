@@ -5,13 +5,19 @@ namespace Samarium.PluginFramework.Plugin {
     using Samarium.PluginFramework.Command;
     using Samarium.PluginFramework.Config;
     using Samarium.PluginFramework.Logger;
-
+    using Samarium.PluginFramework.Rest;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.ServiceModel.Description;
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Base class for plugins used by Samarium and/or its derivatives.
+    /// It is recommended this abstract class be used as a direct base class instead of the interface this class
+    /// inherits from.
+    /// </summary>
     public abstract class Plugin : IPlugin {
 
         private readonly Logger log;
@@ -30,6 +36,9 @@ namespace Samarium.PluginFramework.Plugin {
                 .Execute(execArgs);
         }
 
+        /// <summary>
+        /// Gets this plugin's configuration.
+        /// </summary>
         internal protected abstract IConfig PluginConfig { get; }
 
         /// <summary>
@@ -59,6 +68,12 @@ namespace Samarium.PluginFramework.Plugin {
         /// <returns><code>true</code> if the plugin shut down correctly.</returns>
         public abstract bool OnStop();
 
+        /// <summary>
+        /// Gets the (RESTful) service endpoints provided by this plugin.
+        /// It is mandatory that every plugin at least assign a non-null value to this auto-property.
+        /// </summary>
+        public abstract IEndpointContainer ServiceEndpointContainer { get; }
+        
         #region Implemented methods
         /// <summary>
         /// Log an error
@@ -104,17 +119,16 @@ namespace Samarium.PluginFramework.Plugin {
         protected void Warn(string format, params object[] args) => log.Warn(format, args);
 
         /// <summary>
-        /// Essentially a shortcut to <see cref="Console.WriteLine"/>
+        /// Essentially a shortcut to <see cref="Console.WriteLine(string, object[])"/>
         /// </summary>
         /// <param name="format"></param>
         /// <param name="args"></param>
         protected void ToConsole(string format, params object[] args) => log.Output(format, args);
         
         /// <summary>
-        /// Essentially a shortcut to <see cref="Console.WriteLine"/>
+        /// Essentially a shortcut to <see cref="Console.WriteLine(string)"/>
         /// </summary>
-        /// <param name="format"></param>
-        /// <param name="args"></param>
+        /// <param name="msg">The message to print</param>
         protected void ToConsole(string msg) => log.Output(msg);
 
         /// <summary>
@@ -178,6 +192,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// which may potentially damage the application, or resources it is using.
         /// </summary>
         /// <param name="configKey">The key of the desired config</param>
+        /// <param name="pluginName" >(Optional) The name of the plugin</param>
         /// <returns></returns>
         protected object GetSystemWideConfig(string configKey, string pluginName = default) => GetSystemWideConfigEvent?.Invoke(configKey, pluginName);
         #endregion

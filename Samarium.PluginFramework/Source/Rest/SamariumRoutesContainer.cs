@@ -11,7 +11,9 @@ namespace Samarium.PluginFramework.Rest {
     using System.Threading.Tasks;
 
     [ServiceContract(Name = nameof(SamariumRoutesContainer))]
-    internal class SamariumRoutesContainer: IRoutesContainer {
+    internal class SamariumRoutesContainer: IEndpointContainer {
+
+        public string ServiceEndpointBase => "/";
 
         [OperationContract]
         [WebGet(UriTemplate = "/", BodyStyle = WebMessageBodyStyle.Bare)]

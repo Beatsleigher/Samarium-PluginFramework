@@ -9,8 +9,18 @@ namespace Samarium.PluginFramework.Command {
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Represents a command executable within the application.
+    /// Commands can be executed from within a plugin.
+    /// </summary>
     public class Command : ICommand {
 
+        /// <summary>
+        /// Gets a basic command object from the passed data.
+        /// </summary>
+        /// <param name="commandTag">The command's name.</param>
+        /// <param name="args">The arguments to execute the command with.</param>
+        /// <returns></returns>
         public static ICommand GetExecutableCommand(string commandTag, params string[] args) => new Command(commandTag, args);
 
         /// <summary>
@@ -26,8 +36,20 @@ namespace Samarium.PluginFramework.Command {
             Arguments = args;
         }
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public Command() { }
 
+        /// <summary>
+        /// 2nd Recommended constructor.
+        /// </summary>
+        /// <param name="parentPlugin">The parent plugin. (Default if application command)</param>
+        /// <param name="commandTag">The command tag.</param>
+        /// <param name="desc">Long description of the command and its features.</param>
+        /// <param name="args">The arguments available with the command.</param>
+        /// <param name="switches">The switches available with the command.</param>
+        /// <param name="cmdHandler">The handler delegate.</param>
         public Command(IPlugin parentPlugin, string commandTag, string desc, string[] args, Dictionary<string, string[]> switches, CommandExecutedHandler cmdHandler) {
             ParentPlugin = parentPlugin;
             CommandTag = commandTag;
@@ -38,6 +60,16 @@ namespace Samarium.PluginFramework.Command {
             Handler = cmdHandler;
         }
 
+        /// <summary>
+        /// Recommended constructor.
+        /// </summary>
+        /// <param name="parentPlugin">The parent plugin. (Default if application command)</param>
+        /// <param name="commandTag">The command tag.</param>
+        /// <param name="desc">Long description of the command and its features.</param>
+        /// <param name="shortDesc">Short description of the command.</param>
+        /// <param name="args">The arguments available with the command.</param>
+        /// <param name="switches">The switches available with the command.</param>
+        /// <param name="cmdHandler">The handler delegate.</param>
         public Command(IPlugin parentPlugin, string commandTag, string desc, string shortDesc, string[] args, Dictionary<string, string[]> switches, CommandExecutedHandler cmdHandler) {
             ParentPlugin = parentPlugin;
             CommandTag = commandTag;
@@ -48,12 +80,39 @@ namespace Samarium.PluginFramework.Command {
             Handler = cmdHandler;
         }
 
+        /// <summary>
+        /// The plugin this command is associated with.
+        /// </summary>
         public IPlugin ParentPlugin { get; set; }
+
+        /// <summary>
+        /// The command's tag. The actual string you type in to execute (call) the command.
+        /// </summary>
         public string CommandTag { get; set; }
+
+        /// <summary>
+        /// A long description of the command and its different features.
+        /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// A short, one-line description of the command.
+        /// </summary>
         public string ShortDescription { get; set; }
+
+        /// <summary>
+        /// The arguments this command provides.
+        /// </summary>
         public string[] Arguments { get; set; }
+
+        /// <summary>
+        /// The switches this command provides.
+        /// </summary>
         public Dictionary<string, string[]> Switches { get; set; }
+
+        /// <summary>
+        /// The handler delegate.
+        /// </summary>
         public CommandExecutedHandler Handler { get; set; }
 
         /// <summary>

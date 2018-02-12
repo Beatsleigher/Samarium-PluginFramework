@@ -17,9 +17,15 @@ namespace Samarium.PluginFramework.Config {
     using YamlDotNet.Serialization.NamingConventions;
     using YamlDotNet.Serialization.NodeDeserializers;
 
+    /// <summary>
+    /// Defines a configuration that is inherintly dynamic.
+    /// </summary>
     public class DynamicConfig : IConfig {
 
         #region Static members
+        /// <summary>
+        /// Gets a regular expression matching YAML boolean values.
+        /// </summary>
         public static Regex YamlBoolRegex { get; }
 
         static DynamicConfig() {
@@ -33,9 +39,19 @@ namespace Samarium.PluginFramework.Config {
         const string TrueString = "true";
         const string FalseString = "false";
 
+        /// <summary>
+        /// Event gets called when a single config is set.
+        /// </summary>
         public event ConfigSetEventHandler ConfigSet;
+
+        /// <summary>
+        /// Event gets called when the configs are loaded.
+        /// </summary>
         public event ConfigsLoadedEventHandler ConfigsLoaded;
         
+        /// <summary>
+        /// The directory in which the configs are saved.
+        /// </summary>
         public DirectoryInfo ConfigDirectory { get; }
 
         Dictionary<string, object> cfgHashMap;
@@ -43,6 +59,12 @@ namespace Samarium.PluginFramework.Config {
         FileInfo cfgFile;
         FileInfo defCfgFile;
 
+        /// <summary>
+        /// Recommended constructor.
+        /// </summary>
+        /// <param name="configDir">The config dir</param>
+        /// <param name="name">The name of the config manager</param>
+        /// <param name="defConfigs">A serialised string containing the default configs.</param>
         public DynamicConfig(DirectoryInfo configDir, string name, string defConfigs) {
             ConfigDirectory = configDir;
             Name = name;
@@ -54,6 +76,12 @@ namespace Samarium.PluginFramework.Config {
             Init(defConfigs);
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="configDir"></param>
+        /// <param name="name"></param>
+        /// <param name="defConfigs"></param>
         public DynamicConfig(string configDir, string name, FileInfo defConfigs): this(new DirectoryInfo(configDir), name, File.ReadAllText(defConfigs.FullName)) {
             defCfgFile = defConfigs;
         }
@@ -70,17 +98,42 @@ namespace Samarium.PluginFramework.Config {
         }
 
         #region Properties
+        /// <summary>
+        /// Gets a value indicating whether this config manager is inherintly dynamic.
+        /// Always <code>true</code>.
+        /// </summary>
         public bool IsDynamic => true;
 
+        /// <summary>
+        /// Counts the configurations found.
+        /// </summary>
         public int ConfigCount => cfgHashMap.Count;
 
+        /// <summary>
+        /// Gets a list containing all the keys found.
+        /// </summary>
         public List<string> Keys => cfgHashMap?.Keys.ToList();
 
+        /// <summary>
+        /// Gets the name of this config manager.
+        /// </summary>
         public string Name { get; }
         #endregion
 
+        /// <summary>
+        /// Gets a boolean value.
+        /// </summary>
+        /// <param name="key">The config's key</param>
+        /// <returns></returns>
         public bool GetBool(string key) => GetConfig<bool>(key);
 
+        /// <summary>
+        /// Attempts to get a config's default value.
+        /// </summary>
+        /// <typeparam name="T">The config's type</typeparam>
+        /// <param name="key">The config's key</param>
+        /// <param name="cfg">The config's value</param>
+        /// <returns><code>true</code> if the config was found.</returns>
         public bool TryGetDefault<T>(string key, out T cfg) {
             var hasKey = cfgHashMap.TryGetValue(key, out var value);
 
@@ -109,6 +162,12 @@ namespace Samarium.PluginFramework.Config {
             }
         }
 
+        /// <summary>
+        /// Attempts to get a config.
+        /// </summary>
+        /// <typeparam name="T">The config's type.</typeparam>
+        /// <param name="key">The config's key.</param>
+        /// <returns>The value of the config.</returns>
         public T GetConfig<T>(string key) {
             var hasKey = cfgHashMap.TryGetValue(key, out var value);
 
@@ -132,6 +191,13 @@ namespace Samarium.PluginFramework.Config {
             }
         }
 
+        /// <summary>
+        /// Attempts to get a config.
+        /// </summary>
+        /// <typeparam name="T">The config's type.</typeparam>
+        /// <param name="key">The config's key.</param>
+        /// <param name="cfg">The config's value.</param>
+        /// <returns><code>true</code>if the config was found.</returns>
         public bool TryGetConfig<T>(string key, out T cfg) {
             try {
                 cfg = GetConfig<T>(key);
@@ -142,14 +208,38 @@ namespace Samarium.PluginFramework.Config {
             }
         }
 
+        /// <summary>
+        /// Gets a <code>double</code> from the configs.
+        /// </summary>
+        /// <param name="key">The config's key.</param>
+        /// <returns></returns>
         public double GetDouble(string key) => GetConfig<double>(key);
 
+        /// <summary>
+        /// Gets an integer value from the configs.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public int GetInt(string key) => GetConfig<int>(key);
 
+        /// <summary>
+        /// Gets a string value from the configs.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public string GetString(string key) => GetConfig<string>(key);
 
+        /// <summary>
+        /// Gets a value indicating whether this config utility contains a config
+        /// with a given key.
+        /// </summary>
+        /// <param name="key">The key to check against.</param>
+        /// <returns><code>true</code> if the config was found.</returns>
         public bool HasKey(string key) => cfgHashMap.ContainsKey(key);
 
+        /// <summary>
+        /// Loads the configs in to memory.
+        /// </summary>
         public void LoadConfigs() {
 #if USE_YAMLDOTNET
             var deserializer = new DeserializerBuilder()
@@ -198,6 +288,9 @@ namespace Samarium.PluginFramework.Config {
             ConfigsLoaded?.Invoke(this);
         }
 
+        /// <summary>
+        /// Saves the configurations to disk.
+        /// </summary>
         public async void SaveConfigs() {
             var serializer = new SerializerBuilder()
                 .WithNamingConvention(new UnderscoredNamingConvention())
@@ -210,6 +303,12 @@ namespace Samarium.PluginFramework.Config {
 
         }
 
+        /// <summary>
+        /// Sets a given config.
+        /// </summary>
+        /// <typeparam name="T">The config's type-</typeparam>
+        /// <param name="key">The config's key.</param>
+        /// <param name="value">The new value of the config.</param>
         public void SetConfig<T>(string key, T value) {
             if (HasKey(key)) {
                 cfgHashMap.TryGetValue(key, out var curValue);
@@ -224,6 +323,12 @@ namespace Samarium.PluginFramework.Config {
 
         }
 
+        /// <summary>
+        /// Enumerates configs matching a given predicate.
+        /// </summary>
+        /// <typeparam name="T">The type of the configs.</typeparam>
+        /// <param name="predicate">The predicate to check against.</param>
+        /// <returns></returns>
         public IEnumerable<T> Where<T>(Func<string, bool> predicate) {
             List<T> values = new List<T>();
 
@@ -233,6 +338,11 @@ namespace Samarium.PluginFramework.Config {
             return values;
         }
 
+        /// <summary>
+        /// Serialises this object so it may be saved to disk.
+        /// </summary>
+        /// <param name="serializationType"></param>
+        /// <returns></returns>
         public string ToString(ConfigSerializationType serializationType = ConfigSerializationType.Yaml) {
             switch (serializationType) {
                 case ConfigSerializationType.Yaml:

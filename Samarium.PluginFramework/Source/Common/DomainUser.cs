@@ -12,8 +12,16 @@ namespace Samarium.PluginFramework.Common {
     /// </summary>
     public class DomainUser {
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public DomainUser() { }
 
+        /// <summary>
+        /// Recommended constructor.
+        /// </summary>
+        /// <param name="name">The name of the user</param>
+        /// <param name="parent">The parent domain.</param>
         public DomainUser(string name, Domain parent) {
             Name = name;
             ParentDomain = parent;

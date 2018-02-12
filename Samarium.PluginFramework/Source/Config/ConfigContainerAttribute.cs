@@ -9,6 +9,9 @@ namespace Samarium.PluginFramework.Config {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, Inherited = true, AllowMultiple = true)]
     public sealed class ConfigContainerAttribute : Attribute {
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public ConfigContainerAttribute() { }
     }
 

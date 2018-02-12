@@ -13,8 +13,16 @@ namespace Samarium.PluginFramework.Command {
     /// <typeparam name="T">The type contained within the result.</typeparam>
     public class CommandResult<T> : ICommandResult<T> {
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public CommandResult() { }
 
+        /// <summary>
+        /// Parameterised constructor.
+        /// </summary>
+        /// <param name="msg">The message</param>
+        /// <param name="result">The actual result.</param>
         public CommandResult(string msg, T result) {
             Message = msg;
             Result = result;
