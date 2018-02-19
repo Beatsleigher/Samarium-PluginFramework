@@ -72,7 +72,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// Gets the (RESTful) service endpoints provided by this plugin.
         /// It is mandatory that every plugin at least assign a non-null value to this auto-property.
         /// </summary>
-        public abstract IEndpointContainer ServiceEndpointContainer { get; }
+        public abstract List<IEndpointContainer> ServiceEndpointContainer { get; }
         
         #region Implemented methods
         /// <summary>

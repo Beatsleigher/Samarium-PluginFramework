@@ -5,7 +5,8 @@ namespace Samarium.PluginFramework {
     using Command;
     using Config;
     using Plugin;
-
+    using System.IO;
+    using System.ServiceModel.Web;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -57,5 +58,17 @@ namespace Samarium.PluginFramework {
     /// <param name="pluginName" >(Optional): Specifically target a single plugin's configuration.</param>
     /// <returns>The value of the config or the default value.</returns>
     internal delegate object GetSystemWideConfigEventHandler(string configKey, string pluginName = default);
+
+    /// <summary>
+    /// Delegate function used to create and execute handlers for RESTful service endpoints (routes).
+    /// </summary>
+    /// <param name="webReq">The incoming web request.</param>
+    /// <param name="webResp">The outgoing response.</param>
+    /// <param name="state">The internal state. This will only contain data, if data was passed via the request!</param>
+    /// <returns>A <see cref="Stream"/> containing the data that will be returned to the client.</returns>
+    /// <remarks>
+    /// It is recommended that streams be prepared using the provided extensions.
+    /// </remarks>
+    public delegate Stream RestulRouteHandler(IncomingWebRequestContext webReq, OutgoingWebResponseContext webResp, object state);
 
 }

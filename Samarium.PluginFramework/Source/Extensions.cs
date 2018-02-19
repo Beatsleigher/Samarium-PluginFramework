@@ -32,6 +32,9 @@ namespace Samarium.PluginFramework {
         // We divide this by 8 within the code below to get the equivalent number of bytes.
         private const int Keysize = 256;
 
+        const string DefaultServerErrorDesc = "The server encountered an error it could not recover from. Please contact your system administrator.";
+        const string MimeTypeJson = "application/json";
+
         // This constant determines the number of iterations for the password bytes generation function.
         private const int DerivationIterations = 1000;
 
@@ -392,18 +395,12 @@ namespace Samarium.PluginFramework {
         /// <param name="ipAddress">The IP address to check.</param>
         /// <returns><code>true</code> if IP address is v4 link-local or not.</returns>
         public static bool IsIPv4LinkLocal(this IPAddress ipAddress) {
-
             var addrBytes = ipAddress.GetAddressBytes();
-
-            if (addrBytes[0] == 192 && addrBytes[1] == 168) {
-                // Is link-local
-                return true;
-            } else if (addrBytes[0] == 127) {
-                // Is link-local
-                return true;
-            } else if (addrBytes[0] == 10) {
-                // Is link-local
-                return true;
+            
+            switch (addrBytes[0]) {
+                case 0xA:  return true;
+                case 0xAC: return addrBytes[1] == 0x10;
+                case 0xC0: return addrBytes[1] == 0xA8;
             }
 
             return false;
@@ -442,8 +439,9 @@ namespace Samarium.PluginFramework {
         /// <param name="noContent">If set to <code>true</code>, the content-length header will be set to 0.</param>
         /// <param name="requestDescription" >Optional request description. Set to <code>null</code> for empty description.</param>
         /// <param name="suppressBody" >Determines whether the entity body will be suppressed or not. If <code >true</code>, an empty response will be sent.</param>
-        public static OutgoingWebResponseContext SetStatusAsBadRequest(this OutgoingWebResponseContext context, bool noContent = true, string requestDescription = "Invalid request or bad args/format!", bool suppressBody = true) {
-            context.ContentLength = noContent ? 0 : context.ContentLength;
+        /// <param name="contentLength" >Determines the length of the content being sent.</param>
+        public static OutgoingWebResponseContext SetStatusAsBadRequest(this OutgoingWebResponseContext context, bool noContent = true, string requestDescription = "Invalid request or bad args/format!", bool suppressBody = true, long contentLength = 0) {
+            context.ContentLength = noContent ? 0 : contentLength;
             context.StatusCode = HttpStatusCode.BadRequest;
             context.StatusDescription = requestDescription ?? "";
             context.SuppressEntityBody = suppressBody;
@@ -461,6 +459,23 @@ namespace Samarium.PluginFramework {
             context.Location = newLocation.AbsoluteUri;
             context.StatusCode = statusCode;
             context.StatusDescription = $"{ (int)statusCode } redirect to { newLocation.AbsoluteUri }";
+            return context;
+        }
+
+        /// <summary>
+        /// Sets the status of an <see cref="OutgoingWebResponseContext"/> to HTTP 500/Internal Server Error.
+        /// </summary>
+        /// <param name="context">The response context</param>
+        /// <param name="contentLength">The length of the content being returned.</param>
+        /// <param name="responseDescription">(Optional): response description.</param>
+        /// <param name="contentType">(Optional): content type. Default: <see cref="MimeTypeJson"/></param>
+        /// <returns></returns>
+        public static OutgoingWebResponseContext SetStatusAsInternalServerError(this OutgoingWebResponseContext context, long contentLength, string responseDescription = DefaultServerErrorDesc, string contentType = MimeTypeJson) {
+            context.ContentLength = contentLength;
+            context.ContentType = contentType;
+            context.StatusCode = HttpStatusCode.InternalServerError;
+            context.StatusDescription = responseDescription;
+
             return context;
         }
 
@@ -517,14 +532,14 @@ namespace Samarium.PluginFramework {
         /// </summary>
         /// <param name="routesContainer"></param>
         /// <returns></returns>
-        public static IncomingWebRequestContext GetIncomingWebRequest(this IEndpointContainer _) => WebOperationContext.Current.IncomingRequest;
+        public static IncomingWebRequestContext GetIncomingWebRequest(this object _) => WebOperationContext.Current.IncomingRequest;
 
         /// <summary>
         /// Gets the outgoing web response.
         /// </summary>
         /// <param name="routesContainer"></param>
         /// <returns></returns>
-        public static OutgoingWebResponseContext GetOutgoingWebResponse(this IEndpointContainer _) => WebOperationContext.Current.OutgoingResponse;
+        public static OutgoingWebResponseContext GetOutgoingWebResponse(this object _) => WebOperationContext.Current.OutgoingResponse;
 
         /// <summary>
         /// Gets a <see cref="Stream"/> of bytes containing HTML code
@@ -532,7 +547,7 @@ namespace Samarium.PluginFramework {
         /// <param name="routesContainer"></param>
         /// <param name="htmlString">The string to convert.</param>
         /// <returns>A <see cref="MemoryStream"/></returns>
-        public static Stream GetHtmlStream(this IEndpointContainer _, string htmlString) => new MemoryStream(Encoding.UTF8.GetBytes(htmlString));
+        public static Stream GetHtmlStream(this object _, string htmlString) => new MemoryStream(Encoding.UTF8.GetBytes(htmlString));
 
         /// <summary>
         /// Gets a <see cref="Stream"/> of bytes containing JSON text.
@@ -540,7 +555,7 @@ namespace Samarium.PluginFramework {
         /// <param name="routesContainer"></param>
         /// <param name="objs">The objects to serialise.</param>
         /// <returns>A <see cref="MemoryStream"/></returns>
-        public static Stream GetJsonStream(this IEndpointContainer _, params object[] objs) {
+        public static Stream GetJsonStream(this object _, params object[] objs) {
             return new MemoryStream(JsonConvert.SerializeObject(objs).GetBytes());
         }
 
@@ -550,7 +565,7 @@ namespace Samarium.PluginFramework {
         /// <param name="routesContainer"></param>
         /// <param name="objs">The objects to serialise.</param>
         /// <returns>A <see cref="MemoryStream"/></returns>
-        public static Stream GetPrettyJsonStream(this IEndpointContainer _, params object[] objs) {
+        public static Stream GetPrettyJsonStream(this object _, params object[] objs) {
             return new MemoryStream(JsonConvert.SerializeObject(objs, Formatting.Indented).GetBytes());
         }
 
@@ -560,11 +575,19 @@ namespace Samarium.PluginFramework {
         /// <param name="routesContainer"></param>
         /// <param name="objs">The objects to serialise.</param>
         /// <returns>A <see cref="MemoryStream"/></returns>
-        public static Stream GetYamlStream(this IEndpointContainer _, params object[] objs) {
+        public static Stream GetYamlStream(this object _, params object[] objs) {
             var yamlSerializer = new SerializerBuilder().Build();
             return new MemoryStream(yamlSerializer.Serialize(objs).GetBytes());
         }
 
+        /// <summary>
+        /// Sets the status of an outgoing response as 404/Not Found.
+        /// It is recommended that optional parameters be filled.
+        /// </summary>
+        /// <param name="context">The response context.</param>
+        /// <param name="description">The response description.</param>
+        /// <param name="contentLength">The length of the content being transported with the response.</param>
+        /// <param name="contentType">The content type of the data being transported with the respone.</param>
         public static void SetAsNotFound(this OutgoingWebResponseContext context, string description = "", long contentLength = 0, string contentType = "application/x-empty") {
             context.ContentLength = contentLength;
             context.ContentType = contentType;
@@ -572,12 +595,25 @@ namespace Samarium.PluginFramework {
             context.StatusCode = (HttpStatusCode)404;
         }
 
+        /// <summary>
+        /// Sets the status of an outgoing response as 204/No Content.
+        /// </summary>
+        /// <param name="context">The response context.</param>
+        /// <param name="description">The response description.</param>
         public static void SetAsNoContent(this OutgoingWebResponseContext context, string description = "") {
             context.ContentLength = 0;
             context.StatusDescription = description;
             context.StatusCode = (HttpStatusCode)204;
         }
 
+        /// <summary>
+        /// Sets the status of an outgoing response as 200/Ok.
+        /// It is recommended that optional parameters be filled.
+        /// </summary>
+        /// <param name="context">The response context.</param>
+        /// <param name="description">The response description.</param>
+        /// <param name="contentLength">The length of the content being transported with the response.</param>
+        /// <param name="contentType">The content type of the data being transported with the response.</param>
         public static void SetAsOk(this OutgoingWebResponseContext context, string description = "", long contentLength = 0, string contentType = "application/x-empty") {
             context.ContentLength = contentLength;
             context.ContentType = contentType;
@@ -771,9 +807,7 @@ namespace Samarium.PluginFramework {
         /// <param name="extractor">The extractor.</param>
         /// <param name="rawData">The raw data.</param>
         /// <returns></returns>
-        public static async Task<TextExtractionResult> ExtractAsync(this TextExtractor extractor, byte[] rawData) {
-            return await Task.Run(() => extractor.Extract(rawData));
-        }
+        public static Task<TextExtractionResult> ExtractAsync(this TextExtractor extractor, byte[] rawData) => Task.Run(() => extractor.Extract(rawData));
 
         /// <summary>
         /// Converts a string so it is viable to be an index name within Elasticsearch.
@@ -979,6 +1013,18 @@ namespace Samarium.PluginFramework {
 
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Gets the total length of a two-dimensional byte array
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static long TotalLength(this byte[][] data) {
+            var total = 0L;
+            foreach (var array in data)
+                total += array.Length;
+            return total;
         }
 
     }

@@ -11,7 +11,7 @@ namespace Samarium.PluginFramework.Rest {
     using System.Threading.Tasks;
 
     [ServiceContract(Name = nameof(SamariumRoutesContainer))]
-    internal class SamariumRoutesContainer: IEndpointContainer {
+    internal class SamariumRoutesContainer {
 
         public string ServiceEndpointBase => "/";
 

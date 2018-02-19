@@ -46,7 +46,7 @@
       <HintPath>..\..\Memex\packages\BouncyCastle.1.8.1\lib\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="Elasticsearch.Net, Version=6.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d, processorArchitecture=MSIL">
-      <HintPath>..\..\Memex\packages\Elasticsearch.Net.6.0.0\lib\net46\Elasticsearch.Net.dll</HintPath>
+      <HintPath>..\..\Memex\packages\Elasticsearch.Net.6.0.1\lib\net46\Elasticsearch.Net.dll</HintPath>
     </Reference>
     <Reference Include="IKVM.AWT.WinForms, Version=8.1.5717.0, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
       <HintPath>..\..\Memex\packages\IKVM.8.1.5717.0\lib\IKVM.AWT.WinForms.dll</HintPath>
@@ -136,7 +136,7 @@
       <HintPath>..\..\Memex\packages\MimeKit.2.0.1\lib\net45\MimeKit.dll</HintPath>
     </Reference>
     <Reference Include="Nest, Version=6.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d, processorArchitecture=MSIL">
-      <HintPath>..\..\Memex\packages\NEST.6.0.0\lib\net46\Nest.dll</HintPath>
+      <HintPath>..\..\Memex\packages\NEST.6.0.1\lib\net46\Nest.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\Memex\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -158,11 +158,11 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="TikaOnDotNet, Version=1.16.0.0, Culture=neutral, PublicKeyToken=fd70f0f601f583f3, processorArchitecture=MSIL">
-      <HintPath>..\..\Memex\packages\TikaOnDotnet.TextExtractor.1.16.0\lib\TikaOnDotNet.dll</HintPath>
+    <Reference Include="TikaOnDotNet, Version=1.17.0.0, Culture=neutral, PublicKeyToken=fd70f0f601f583f3, processorArchitecture=MSIL">
+      <HintPath>..\..\Memex\packages\TikaOnDotnet.TextExtractor.1.17.0\lib\TikaOnDotNet.dll</HintPath>
     </Reference>
-    <Reference Include="TikaOnDotNet.TextExtraction, Version=1.16.0.0, Culture=neutral, PublicKeyToken=fd70f0f601f583f3, processorArchitecture=MSIL">
-      <HintPath>..\..\Memex\packages\TikaOnDotnet.TextExtractor.1.16.0\lib\TikaOnDotNet.TextExtraction.dll</HintPath>
+    <Reference Include="TikaOnDotNet.TextExtraction, Version=1.17.0.0, Culture=neutral, PublicKeyToken=fd70f0f601f583f3, processorArchitecture=MSIL">
+      <HintPath>..\..\Memex\packages\TikaOnDotnet.TextExtractor.1.17.0\lib\TikaOnDotNet.TextExtraction.dll</HintPath>
     </Reference>
     <Reference Include="YamlDotNet, Version=4.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\Memex\packages\YamlDotNet.4.3.0\lib\net45\YamlDotNet.dll</HintPath>
@@ -192,6 +192,7 @@
     <Compile Include="Source\ElasticSearch\ElasticSearch.cs" />
     <Compile Include="Source\ElasticSearch\EsConfig.cs" />
     <Compile Include="Source\ElasticSearch\EsConnectionType.cs" />
+    <Compile Include="Source\ElasticSearch\FileElasticDocument.cs" />
     <Compile Include="Source\Exceptions\CommandNotFoundException.cs" />
     <Compile Include="Source\Exceptions\ConfigNotFoundException.cs" />
     <Compile Include="Source\Extensions.cs" />
@@ -201,7 +202,9 @@
     <Compile Include="Source\Plugin\IPlugin.cs" />
     <Compile Include="Source\Plugin\Plugin.cs" />
     <Compile Include="Source\Plugin\PluginRegistry.cs" />
+    <Compile Include="Source\Rest\EndpointContainer.cs" />
     <Compile Include="Source\Rest\ExtendedServiceHostFactory.cs" />
+    <Compile Include="Source\Rest\HttpMethod.cs" />
     <Compile Include="Source\Rest\IEndpointContainer.cs" />
     <Compile Include="Source\Rest\RequestInspector.cs" />
     <Compile Include="Source\Rest\RestService.cs" />

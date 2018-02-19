@@ -43,9 +43,10 @@ namespace Samarium.PluginFramework.Rest {
         public const string RestRootRoute = "/";
 
         #region Instance Variables
-        private Logger logger;
-        private Uri baseUrl;
-        private WebServiceHost serviceHost;
+        private static Logger logger;
+        private static Uri baseUrl;
+        private static WebServiceHost serviceHost;
+        private static List<IEndpointContainer> restfulEndpoints;
         #endregion
 
         #region Static Variables
@@ -56,7 +57,7 @@ namespace Samarium.PluginFramework.Rest {
         #endregion
 
         #region Singleton
-        private RestService(IEndpointContainer[] endpoints, IPAddress listenerIp, ushort port = 80, string routePrefix = "", bool useHttps = false) {
+        private RestService(List<IEndpointContainer>[] endpoints, IPAddress listenerIp, ushort port = 80, string routePrefix = "", bool useHttps = false) {
             logger = Logger.CreateInstance(nameof(RestService), SystemConfig.GetString("config_dir"));
 
             logger.Info("RESTful services are starting...");
@@ -72,18 +73,16 @@ namespace Samarium.PluginFramework.Rest {
 
                 logger.Info("Loading {0} endpoints!", endpoints.Length);
                 var factory = new ExtendedServiceHostFactory();
-                var serviceHost = factory.CreateServiceHost(default, new[] { baseUrl }) as WebServiceHost;
+                serviceHost = factory.CreateServiceHost(default, new[] { baseUrl }) as WebServiceHost;
 
                 logger.Info("Adding endpoints...");
-                /*foreach (var endpoint in endpoints) {
-                    if (useHttps) {
-                        var binding = new BasicHttpsBinding();
-                        
-                        var baseUrl = string.Format("{0}/{1}", tmp, endpoint.ServiceEndpointBase.Trim('/'));
-                        var svHost = serviceHost.AddServiceEndpoint(endpoint.GetType(), binding, endpoint.ServiceEndpointBase);
-                        svHost.EndpointBehaviors.Add(new RequestInspector());
-                    }
-                }*/
+                restfulEndpoints = new List<IEndpointContainer>();
+                var sBuilder = new StringBuilder().AppendLine("Found following RESTful endpoints:");
+                foreach (var endpointContainer in endpoints) {
+                    restfulEndpoints.AddRange(endpointContainer);
+                    sBuilder.AppendLine(string.Join("\n", endpointContainer.Select(ep => string.Format(" - {0}", ep.UriTemplate.ToString()))));
+                }
+                logger.Ok(sBuilder.ToString());
 
                 serviceHost.Open();
                 logger.Ok("Service host started!");
@@ -120,7 +119,7 @@ namespace Samarium.PluginFramework.Rest {
         /// <param name="port">The port to listen to</param>
         /// <param name="routePrefix">An optional route prefix (unused).</param>
         /// <returns>An instance of this class.</returns>
-        public static RestService CreateInstance(IEndpointContainer[] endpoints, IPAddress listenerIp, ushort port = 80, string routePrefix = "") => _instance ?? (_instance = new RestService(endpoints, listenerIp, port, routePrefix));
+        public static RestService CreateInstance(List<IEndpointContainer>[] endpoints, IPAddress listenerIp, ushort port = 80, string routePrefix = "") => _instance ?? (_instance = new RestService(endpoints, listenerIp, port, routePrefix));
         #endregion
 
         

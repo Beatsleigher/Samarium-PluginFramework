@@ -176,7 +176,7 @@ namespace Samarium.PluginFramework.Command {
             var _arguments = new List<string>();
             var _switches = new Dictionary<string, string>();
 
-            foreach (var arg in cmdArgs) {
+            foreach (var arg in cmdArgs.Where(x => !string.IsNullOrEmpty(x) && !string.IsNullOrWhiteSpace(x))) {
                 if (IsArgument(arg)) {
                     _arguments.Add(arg);
                 } else if (IsSwitch(arg.Split(new[] { '=' }, 2)[0] + "=")) {

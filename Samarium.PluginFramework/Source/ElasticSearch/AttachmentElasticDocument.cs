@@ -39,4 +39,5 @@ namespace Samarium.PluginFramework.ElasticSearch {
         public string Metadata { get; set; }
 
     }
+
 }

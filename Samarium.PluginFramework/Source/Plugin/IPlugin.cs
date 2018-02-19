@@ -97,7 +97,7 @@ namespace Samarium.PluginFramework.Plugin {
         /// are then loaded in to the application's RESTful service.
         /// These endpoints MUST be defined before the plugin hits the <see cref="OnLoaded"/> method!
         /// </summary>
-        IEndpointContainer ServiceEndpointContainer { get; }
+        List<IEndpointContainer> ServiceEndpointContainer { get; }
 
         
     }
