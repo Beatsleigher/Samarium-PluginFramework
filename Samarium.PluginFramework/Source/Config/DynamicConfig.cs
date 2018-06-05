@@ -70,7 +70,7 @@ namespace Samarium.PluginFramework.Config {
             Name = name;
 
             cfgFile = new FileInfo(Path.Combine(ConfigDirectory.FullName, Name));
-            if (defCfgFile is default)
+            if (defCfgFile is null)
                 defCfgFile = new FileInfo(Path.Combine(ConfigDirectory.FullName, string.Concat(Name.Replace(Path.GetExtension(Name), ""), ".def", Path.GetExtension(Name))));
             
             Init(defConfigs);

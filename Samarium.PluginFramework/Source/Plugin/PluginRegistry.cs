@@ -88,12 +88,12 @@ namespace Samarium.PluginFramework.Plugin {
         /// <returns><c>true</c>, if plugin was removed, <c>false</c> otherwise.</returns>
         /// <param name="pluginClass">Plugin class.</param>
         public bool RemovePlugin(IPlugin pluginClass) {
-            if (pluginClass is default)
+            if (pluginClass is null)
                 throw new ArgumentNullException(nameof(pluginClass), "Plugin class reference must not be null!");
 
             ListOfPlugins.TryGetValue(pluginClass.GetType().Assembly, out var type);
             var assembly = pluginClass.GetType().Assembly;
-            if (type is default)
+            if (type is null)
                 return false;
             var exitValue = pluginClass.OnStop();
             ListOfPlugins.Remove(assembly);
@@ -299,14 +299,14 @@ namespace Samarium.PluginFramework.Plugin {
 
             var plugin = default(Plugin);
 
-            if (pluginName is default)
+            if (pluginName is null)
                 plugin = pluginInstances.Select(pl => pl as Plugin)?
-                                        .FirstOrDefault(pl => !(pl is default) && PluginHasConfig(pl, configKey));
+                                        .FirstOrDefault(pl => !(pl is null) && PluginHasConfig(pl, configKey));
             else
                 plugin = pluginInstances.Select(pl => pl as Plugin)
                                         .FirstOrDefault(pl => pl.PluginName.ToLowerInvariant() == pluginName.ToLowerInvariant());
 
-            if (plugin is default || plugin.PluginConfig is default)
+            if (plugin is null || plugin.PluginConfig is null)
                 if (SystemConfig.TryGetConfig<object>(configKey, out var _cfgObj))
                     return _cfgObj;
                 else return default;
@@ -318,9 +318,7 @@ namespace Samarium.PluginFramework.Plugin {
             return default;
         }
 
-        private bool PluginHasConfig(Plugin plugin, string config) {
-            return plugin.PluginConfig?.HasKey(config) == true;
-        }
+        private bool PluginHasConfig(Plugin plugin, string config) => plugin.PluginConfig?.HasKey(config) == true;
 
     }
 }

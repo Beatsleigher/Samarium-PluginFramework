@@ -902,7 +902,7 @@ namespace Samarium.PluginFramework {
             } else {
                 return dirInfo.GetFiles()
                               .Union(dirInfo.GetDirectories().Select(d => d.GetNewestFileOrDefault()))
-                              .OrderByDescending(f => f is default ? DateTime.MinValue : f.LastWriteTime)
+                              .OrderByDescending(f => f is null ? DateTime.MinValue : f.LastWriteTime)
                               .FirstOrDefault();
             }
         }
@@ -920,7 +920,7 @@ namespace Samarium.PluginFramework {
 
             var filesToDigest = directory.EnumerateFiles().Where(f => { foreach (var pattern in filesToSkip) { if (Regex.IsMatch(f.Name, pattern)) return false; } return true; });
             foreach (var file in filesToDigest)
-                if (digest is default)
+                if (digest is null)
                     digest = file.Digest();
                 else
                     digest.Xor(file.Digest());
@@ -928,12 +928,12 @@ namespace Samarium.PluginFramework {
             
             if (recursive)
                 foreach (var subDir in directory.EnumerateDirectories())
-                    if (digest is default)
+                    if (digest is null)
                         digest = subDir.DigestDirectory(recursive, hashFileName, filesToSkip);
                     else
                         digest.Xor(subDir.DigestDirectory(recursive, hashFileName, filesToSkip));
 
-            if (!(hashFileName is default) && !string.IsNullOrEmpty(hashFileName)) {
+            if (!(hashFileName is null) && !string.IsNullOrEmpty(hashFileName)) {
                 File.WriteAllBytes(Path.Combine(directory.FullName, hashFileName), digest);
             }
 
@@ -951,9 +951,9 @@ namespace Samarium.PluginFramework {
         /// The comparison will take place directory on the buffer array.
         /// </remarks>
         public static void Xor(this byte[] buffer, byte[] sequence) {
-            if (buffer is default)
+            if (buffer is null)
                 buffer = new byte[sequence?.Length ?? 32];
-            if (sequence is default)
+            if (sequence is null)
                 sequence = new byte[buffer.Length];
 
             if (buffer.Length != sequence.Length) {

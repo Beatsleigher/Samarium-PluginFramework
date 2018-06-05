@@ -44,7 +44,23 @@ namespace Samarium.PluginFramework.Rest {
         /// <returns></returns>
         [WebGet(UriTemplate = BaseRoute)]
         public Stream IndexRoute() {
-            var htmlString = "<html ><head ><title >It Works!</title></head><body >Hooray!</body></html>";
+            var htmlString = $@"
+<html >
+    <head >
+        <title >Willkommen bei Memex 2.0!</title>
+    </head>
+    <body >
+        <header >
+            <h1 >Willkommen beim Memex 2.0 (Backend)!</h1>
+        </header>
+        <main >
+            <h3 >Unten stehend finden Sie eine Liste der verfügbaren Routen:</h3>
+            <ul >
+                { string.Join("\n", restfulEndpoints.Select(x => $"<li ><a href=\"{ string.Format("{0}/{1}", GetHttpMethodRoutePrefix(x.Method), x.UriTemplateString) }\" >{ string.Format("{0}/{1}", GetHttpMethodRoutePrefix(x.Method), x.UriTemplateString) }</a></li>")) }
+            <ul>
+        </main>
+    </body>
+</html>";
             this.GetOutgoingWebResponse().SetAsOk("It worked!", htmlString.Length, "text/html");
             return this.GetHtmlStream(htmlString);
         }
@@ -71,7 +87,7 @@ namespace Samarium.PluginFramework.Rest {
 
             var endpoint = restfulEndpoints.FirstOrDefault(x => GetMatchingRoute(x, webRequest, HttpMethod.GET));
 
-            if (endpoint is default) {
+            if (endpoint is null) {
                 var json = this.GetPrettyJsonStream(NotFound);
                 webResponse.SetAsNotFound(string.Format(NotFoundFormatString, webRequest.UriTemplateMatch.RequestUri), json.Length, JsonMimeType);
                 return json;
@@ -93,7 +109,7 @@ namespace Samarium.PluginFramework.Rest {
 
             var endpoint = restfulEndpoints.FirstOrDefault(x => GetMatchingRoute(x, webRequest, HttpMethod.POST));
 
-            if (endpoint is default) {
+            if (endpoint is null) {
                 var json = this.GetPrettyJsonStream(NotFound);
                 webResponse.SetAsNotFound(string.Format(NotFoundFormatString, webRequest.UriTemplateMatch.RequestUri), json.Length, JsonMimeType);
                 return json;
@@ -118,7 +134,7 @@ namespace Samarium.PluginFramework.Rest {
 
             var endpoint = restfulEndpoints.FirstOrDefault(x => GetMatchingRoute(x, webRequest, HttpMethod.PUT));
 
-            if (endpoint is default) {
+            if (endpoint is null) {
                 var json = this.GetPrettyJsonStream(NotFound);
                 webResponse.SetAsNotFound(string.Format(NotFoundFormatString, webRequest.UriTemplateMatch.RequestUri), json.Length, JsonMimeType);
                 return json;
@@ -140,7 +156,7 @@ namespace Samarium.PluginFramework.Rest {
 
             var endpoint = restfulEndpoints.FirstOrDefault(x => GetMatchingRoute(x, webRequest, HttpMethod.DELETE));
 
-            if (endpoint is default) {
+            if (endpoint is null) {
                 var json = this.GetPrettyJsonStream(NotFound);
                 webResponse.SetAsNotFound(string.Format(NotFoundFormatString, webRequest.UriTemplateMatch.RequestUri), json.Length, JsonMimeType);
                 return json;
@@ -159,6 +175,17 @@ namespace Samarium.PluginFramework.Rest {
             var isUriMatch = foundUriSegments == endpoint.UriTemplate.ToString();
 
             return isGet && isUriMatch;
+        }
+
+        private string GetHttpMethodRoutePrefix(HttpMethod method) {
+            switch (method) {
+                case HttpMethod.DELETE: return "_delete";
+                case HttpMethod.GET: return "_get";
+                case HttpMethod.POST: return "_post";
+                case HttpMethod.PUT: return "_put";
+                default:
+                    return "_get";
+            }
         }
 
     }

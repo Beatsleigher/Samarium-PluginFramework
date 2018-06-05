@@ -78,7 +78,7 @@ namespace Samarium.PluginFramework.Config {
                                                    .Where(x => x.GetCustomAttribute<ConfigMemberAttribute>().Name == key)
                                                    .FirstOrDefault();
 
-            if (config is default)
+            if (config is null)
                 throw new ConfigNotFoundException(string.Format("The config \"{0}\" was not found!", key), key);
             if (config.PropertyType != typeof(T))
                 throw new InvalidCastException(string.Format("Cannot cast {0} to {1}", config.PropertyType.Name, typeof(T).Name));
@@ -127,7 +127,7 @@ namespace Samarium.PluginFramework.Config {
         public bool HasKey(string key) => !(configContainer?.GetType().GetProperties()
                                                    .Where(IsConfigMember)
                                                    .Where(x => x.GetCustomAttribute<ConfigMemberAttribute>().Name == key)
-                                                   .FirstOrDefault() is default);
+                                                   .FirstOrDefault() is null);
 
         /// <summary>
         /// Loads the configurations.

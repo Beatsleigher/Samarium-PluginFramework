@@ -21,7 +21,7 @@ namespace Samarium.PluginFramework.Logger {
 
 		Logger(string name, string logFilePath) {
 			LoggerName = name;
-            if (logFilePath is default)
+            if (logFilePath is null)
                 LogFilePath = SystemConfig?.GetString("log_directory");
             else
                 LogFilePath = logFilePath;

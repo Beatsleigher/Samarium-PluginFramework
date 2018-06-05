@@ -77,7 +77,7 @@ namespace Samarium.PluginFramework.Common {
         public Domain AddUsers(params DomainUser[] users) {
             foreach (var user in users)
                 user.ParentDomain = this;
-            if (Users is default)
+            if (Users is null)
                 Users = new List<DomainUser>();
             Users.ToList().AddRange(users);
             return this;
@@ -89,7 +89,7 @@ namespace Samarium.PluginFramework.Common {
         /// <param name="users"></param>
         /// <returns></returns>
         public Domain AddUsers(params string[] users) {
-            if (Users is default)
+            if (Users is null)
                 Users = new List<DomainUser>();
             var tmp = Users.ToList();
 
